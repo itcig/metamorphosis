@@ -3,7 +3,7 @@ import { ConsumerService } from '../consumer.class';
 import { Application, DefaultConsumerServiceOptions } from '../../../../types/types';
 
 // const debug = Debug('metamorphosis:app:consumer:mysql');
-const debugErrors = Debug('metamorphosis.errors');
+const debugErrors = Debug('metamorphosis:errors');
 
 export class DefaultConsumerService extends ConsumerService {
 	/** Service options for this consumer */

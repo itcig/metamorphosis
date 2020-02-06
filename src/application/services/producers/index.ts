@@ -1,10 +1,10 @@
 import { Application } from '../../../types/types';
-import DefaultProducer from './default/default.service';
-import WebhookProducer from './webhook/webhook.service';
+import defaultProducer from './default/default.service';
+import webhookProducer from './webhook/webhook.service';
 
-export { DefaultProducer, WebhookProducer };
+export { defaultProducer, webhookProducer };
 
 export default function(app: Application): void {
-	app.configure(DefaultProducer);
-	app.configure(WebhookProducer);
+	app.configure(defaultProducer);
+	app.configure(webhookProducer);
 }
