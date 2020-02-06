@@ -221,6 +221,19 @@ export interface ApplicationKafkaSettings {
 	producer: ProducerConfig;
 }
 
+export interface ServerConfig {
+	address: string;
+	port: number;
+	contentType?: string;
+	logger?: any;
+	fastifyOpts?: fastify.RouteShorthandOptions;
+}
+
+export interface ServerInterface {
+	start(): Promise<void>;
+	stop(): Promise<void>;
+}
+
 export interface DatabaseConfig {
 	connectionString?: string;
 	config?: PoolConnection;
