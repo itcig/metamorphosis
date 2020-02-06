@@ -36,6 +36,26 @@ cp .env.example .env
 
 See `/examples` folder for specific sample applications
 
+## Services
+
+Allow for consistent setup processing of Kafka topics using common tools for repeated tasks.
+
+### Default Consumer
+
+Pass a callback and perform work on each message in a single topic
+
+### Default Producer
+
+Generate a client connection with the ability to write messages into a Kafka topic.
+
+### Webhook Producer
+
+Define an endpoint to consume payloads and write to a Kafka topic.
+
+### Database Adapter
+
+Pass a database adapter into any service for reading and writing to a database.
+
 # Testing
 
 **Install either the `Kitchen Sink` package or pick and choose from the items below.**

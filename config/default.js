@@ -30,6 +30,13 @@ module.exports = {
 		producer: {
 			// Default producer topic
 			topic: '',
+			// Control the number of required acks.
+			// -1 = all replicas must acknowledge (default)
+			// 0 = no acknowledgments
+			// 1 = only waits for the leader to acknowledge
+			acks: -1,
+			// The time to await a response in ms (default is 30000)
+			timeout: 10000,
 		},
 	},
 	database: {
@@ -45,5 +52,11 @@ module.exports = {
 				queueLimit: 0,
 			},
 		},
+	},
+	webhooks: {
+		log: false,
+		port: 3000,
+		route: '/',
+		opts: {},
 	},
 };

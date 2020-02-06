@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
+import * as fastify from 'fastify';
 import { KafkaConfig, ConsumerConfig, ProducerConfig, Message, Kafka } from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
+import * as http from 'http';
 
 // export interface KafkaApp {
 // 	/**
@@ -148,6 +150,14 @@ export declare class ProducerService<T = any> extends Service<T> implements Serv
 }
 
 export type DefaultProducerServiceOptions = ProducerServiceOptions;
+
+export interface WebhookProducerServiceOptions extends ProducerServiceOptions {
+	route: string;
+	port: number;
+	fastifyOpts?: fastify.RouteShorthandOptions;
+	contentType?: string;
+	logger?: any;
+}
 
 export declare class DefaultProducerService<T = any> extends ProducerService<T> implements InternalServiceMethods<T> {
 	options: DefaultProducerServiceOptions;

@@ -103,11 +103,11 @@ export default class App implements Application {
 	use(serviceName: string, service: Partial<ServiceMethods<any> & SetupMethod> | Application, options?: any): this {
 		// use(path, service, options = {}) {
 
-		const isService = this.methods.concat('setup').some(name => typeof service[name] === 'function');
+		// const isService = this.methods.concat('setup').some(name => typeof service[name] === 'function');
 
-		if (!isService) {
-			throw new Error(`Invalid service object passed \`${serviceName}\``);
-		}
+		// if (!isService) {
+		// 	throw new Error(`Invalid service object passed \`${serviceName}\``);
+		// }
 
 		// If we ran setup already, set this service up explicitly
 		if (this._isSetup && typeof service.setup === 'function') {

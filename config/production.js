@@ -45,4 +45,7 @@ module.exports = {
 			},
 		},
 	},
+	webhooks: {
+		log: WEBHOOK_LOGGING,
+	},
 };
