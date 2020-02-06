@@ -1,9 +1,10 @@
 import Debug from 'debug';
-import { Message, Producer } from 'kafkajs';
+import { Message, Producer, ProducerRecord, RecordMetadata } from 'kafkajs';
 import { Service } from '../service.class';
 import { Application, ProducerServiceOptions } from '../../../types/types';
 
 const debug = Debug('metamorphosis:app:producer');
+const debugError = Debug('metamorphosis:error');
 
 export class ProducerService extends Service {
 	/** Service options shared by all producers */
@@ -45,27 +46,37 @@ export class ProducerService extends Service {
 	 * Send messages to producer topic. Messages are always sent as an array so this wrapper
 	 * is just a shortcut for sending an individual message
 	 */
-	async send(message: Message): Promise<void> {
+	async send(message: Message): Promise<RecordMetadata[]> {
 		// Build message array to send to kafkajs
 		const messages = [message];
 
 		// Send single
-		await this.sendMessages(messages);
+		return await this.sendMessages(messages);
 	}
 
 	/**
 	 * Send messages to producer topic
 	 */
-	async sendMessages(messages: Message[]): Promise<void> {
+	async sendMessages(messages: Message[]): Promise<RecordMetadata[]> {
 		const topic = this.getTopic();
 		debug(`Producing to topic (${topic})`, messages);
 
-		await this.getProducer().send({
+		const producerRecord: ProducerRecord = {
 			topic,
 			messages,
-		});
+			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
+		};
 
-		debug('Done producing');
+		try {
+			const response = await this.getProducer().send(producerRecord);
+
+			debug('Done producing');
+
+			return response;
+		} catch (err) {
+			debugError(`Error producing message: %o`, err);
+			throw err;
+		}
 	}
 
 	/**
