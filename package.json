@@ -1,0 +1,101 @@
+{
+  "name": "metamorphosis",
+  "version": "0.0.1",
+  "description": "Lightweight JS framework for deploying Kakfa workers",
+  "main": "lib",
+  "types": "lib/",
+  "engines": {
+    "node": ">=10.0"
+  },
+  "author": {
+    "name": "Brad Ash",
+    "email": "bash@capinfogroup.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itcig/metamorphosis.git"
+  },
+  "bugs": {
+    "url": "https://github.com/itcig/metamorphosis/issues"
+  },
+  "homepage": "https://github.com/itcig/metamorphosis#readme",
+  "keywords": [
+    "kafka",
+    "consumer"
+  ],
+  "bundleDependencies": [],
+  "scripts": {
+    "alex": "alex .",
+    "changelog": "github_changelog_generator && git add CHANGELOG.md && git commit -m \"Updating changelog\"",
+    "build": "rimraf ./lib && tsc",
+    "coverage": "nyc npm run test",
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'test/**/*.{js,ts,tsx}' --fix",
+    "test": "npm run lint && clear && mocha \"test/**/*.ts\" --recursive --exit",
+    "kafka:start": "./kafka-setup/start.sh",
+    "kafka:stop": "./kafka-setup/stop.sh",
+    "kafka:logs": "docker-compose --file ./kafka-setup/docker-compose.yml logs -f",
+    "kafka:console": "./kafka-setup/kafka-console.sh",
+    "mysql:start": "./setup/mysql-setup/start.sh",
+    "mysql:stop": "./setup/mysql-setup/stop.sh",
+    "setup:all": "./setup/start.sh",
+    "eslint-check": "eslint --print-config .eslintrc | eslint-config-prettier-check",
+    "prettier": "prettier --write \"{src,test}/**/*.js\"",
+    "prettier:docs": "prettier-markdown README.md docs/*",
+    "typedoc": "typedoc --out dist/docs src"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.{js,css,md}": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsc --noEmit && lint-staged"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "config": "^3.2.5",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "kafkajs": "^1.11.0",
+    "lodash": "^4.17.15",
+    "mysql2": "^2.1.0",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/config": "^0.0.36",
+    "@types/debug": "^4.1.5",
+    "@types/expect": "^24.3.0",
+    "@types/lodash": "^4.14.149",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.5.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "alex": "^8.1.1",
+    "chai": "^4.2.0",
+    "deepmerge": "^4.2.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-markdown": "^1.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "esm": "^3.2.25",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.2",
+    "mocha": "^7.0.1",
+    "nyc": "^15.0.0",
+    "portfinder": "^1.0.23",
+    "prettier": "^1.19.1",
+    "prettier-markdown": "^0.1.8",
+    "progress": "^2.0.3",
+    "rimraf": "^3.0.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
+  }
+}

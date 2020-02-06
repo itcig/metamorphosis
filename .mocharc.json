@@ -1,0 +1,28 @@
+{
+  "diff": true,
+  "exit": true,
+  "extension": [
+    "js",
+    "ts",
+    "tsx"
+  ],
+  "opts": false,
+  "package": "./package.json",
+  "recursive": true,
+  "require": [
+    "ts-node/register",
+    "esm"
+  ],
+  "reporter": "spec",
+  "slow": 75,
+  "timeout": 30000,
+  "watch-files": [
+    "src/**/*.js",
+    "src/**/*.ts",
+    "test/**/*.js",
+    "test/**/*.ts"
+  ],
+  "watch-ignore": [
+    "lib/vendor"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": [
+      "es2015"
+    ],
+    "declaration": true,
+    "allowJs": true,
+    "target": "es2015",
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "noEmit": false,
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "strict": true,
+  },
+  "exclude": [
+    "config",
+    "node_modules"
+  ],
+  "include": [
+    "declarations/*.ts",
+    "src/**/*.ts"
+  ]
+}
