@@ -53,10 +53,10 @@ module.exports = {
 			},
 		},
 	},
-	webhooks: {
+	server: {
 		log: false,
 		port: 3000,
-		route: '/',
+		address: '0.0.0.0',
 		opts: {},
 	},
 };

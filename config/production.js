@@ -46,6 +46,6 @@ module.exports = {
 		},
 	},
 	webhooks: {
-		log: WEBHOOK_LOGGING,
+		log: 'SERVER_LOGGING',
 	},
 };

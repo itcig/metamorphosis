@@ -27,10 +27,10 @@ module.exports = {
 	// 		},
 	// 	},
 	// },
-	webhooks: {
-		log: true,
-		port: 'WEBHOOK_PORT',
-		route: 'WEBHOOK_ROUTE',
+	server: {
+		log: 'SERVER_LOGGING',
+		port: 'SERVER_PORT',
+		address: 'SERVER_HOST',
 		opts: {},
 	},
 };
