@@ -1,0 +1,16 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8.0.19
+    container_name: metamorphosis-mysql
+    ports:
+      - 13306:3306
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - /tmp/mysql-data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d #Scripts initiated on container start (in alphabetical order)
+    environment:
+        MYSQL_DATABASE: "metamorphosis_test"
+        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        MYSQL_ROOT_PASSWORD: ""
