@@ -7,14 +7,14 @@ import { Application, DefaultProducerServiceOptions } from '../../../../types/ty
 // Add this service to the service type index
 declare module '../../../../types/types' {
 	interface ProducerTypes {
-		DefaultProducer: DefaultProducerService;
+		Producer: DefaultProducerService;
 	}
 }
 
 // TODO: Allow passing in 2nd arg for options that will get merged with defaults
 export default function(app: Application): void {
 	// Get Kafka config
-	const kafkaSettings = app.get('kafka');
+	const kafkaSettings = app.get('config.kafka');
 
 	// Get default consumer topic
 	const {
@@ -22,14 +22,14 @@ export default function(app: Application): void {
 	} = kafkaSettings || { producer: { topic: {} } };
 
 	const options: DefaultProducerServiceOptions = {
-		id: 'defaultProducer',
+		id: 'producer',
 		kafkaSettings,
 		topic: defaultTopic,
 	};
 
 	// Initialize our service with any options it requires
 	// TODO: Define route that can be produced to
-	app.use('defaultProducer', new DefaultProducerService(options, app));
+	app.use('producer', new DefaultProducerService(options, app));
 
 	// Get our initialized service so that we can register hooks
 	// const service = app.service('defaultProducer');

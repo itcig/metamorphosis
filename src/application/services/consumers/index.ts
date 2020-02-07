@@ -1,10 +1,10 @@
 import { Application } from '../../../types/types';
-import DefaultConsumer from './default/default.service';
-import MysqlConsumer from './mysql/mysql.service';
+import consumer from './default/default.service';
 
-export { DefaultConsumer, MysqlConsumer };
+// Export individual consumers so they can be loaded explicitly
+export { consumer };
 
 export default function(app: Application): void {
-	app.configure(DefaultConsumer);
-	app.configure(MysqlConsumer);
+	// Import and configure all consumers here
+	app.configure(consumer);
 }

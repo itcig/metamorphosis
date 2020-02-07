@@ -3,8 +3,8 @@ import { Application } from '../types/types';
 
 // Export barrel objects as well as individual service so we can import all or specific services in our application
 export { default as services } from './services';
-export { default as consumers, DefaultConsumer, MysqlConsumer } from './services/consumers';
-export { default as producers, DefaultProducer, WebhookProducer } from './services/producers';
+export { default as consumers, consumer } from './services/consumers';
+export { default as producers, producer } from './services/producers';
 
 // interface Metamophosis {
 // 	// <T = any>(): Application<T>;
@@ -14,7 +14,6 @@ export { default as producers, DefaultProducer, WebhookProducer } from './servic
 
 export default function createApplication(): Application {
 	const app = new App();
-	// app.configure(services);
 	app.init();
 
 	return app;

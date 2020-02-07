@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import * as fastify from 'fastify';
+import fastify, { HTTPMethod, RequestHandler } from 'fastify';
 import { KafkaConfig, ConsumerConfig, ProducerConfig, Message, Kafka } from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
 import * as http from 'http';
+import { Http2Stream } from 'http2';
+import { ApplicationServer } from '../server/server';
+import { DatabaseBaseClient } from '../database-adapters/adapter';
 
 // export interface KafkaApp {
 // 	/**
@@ -41,6 +44,8 @@ export type Id = number | string;
 
 export type NullableId = Id | null;
 
+export type GenericOptions = { [key: string]: any };
+
 export interface ServiceMethods<T> {
 	[key: string]: any;
 
@@ -72,8 +77,17 @@ export type ServiceTypes = ConsumerTypes & ProducerTypes;
 
 // type ServiceMixin = (service: Service<any>, path: string) => void;
 
+export type ApplicationSettings = {
+	client?: Kafka;
+	server?: ApplicationServer;
+	database?: DatabaseBaseClient;
+	[key: string]: any;
+};
+
 export interface Application<ServiceTypes = {}> {
 	version: string;
+
+	settings: ApplicationSettings;
 
 	services: keyof ServiceTypes extends never ? any : ServiceTypes;
 
@@ -103,6 +117,8 @@ export interface Application<ServiceTypes = {}> {
 
 	setup(server?: any): this;
 
+	// server(): any;
+
 	service<L extends keyof ServiceTypes>(serviceName: L): ServiceTypes[L];
 
 	service(
@@ -112,7 +128,15 @@ export interface Application<ServiceTypes = {}> {
 
 	use(serviceName: string, service: Partial<ServiceMethods<any> & SetupMethod> | Application, options?: any): this;
 	// use(serviceName: string, service: any | Application, options?: any): this;
+
+	kill(): Promise<void>;
 }
+
+export type InitFunction = (
+	app?: Application<{}>
+) => {
+	[key: string]: any;
+} | void;
 
 /********************************
  ***  Service methods
@@ -210,15 +234,34 @@ export declare class MysqlConsumerService<T = any> extends ConsumerService<T> im
 // 	};
 // }
 
-export interface ApplicationSettings {
-	env?: string;
-	databaseClient?: string;
-}
+// export interface ApplicationSettings {
+// 	env?: string;
+// 	databaseClient?: string;
+// }
 
 export interface ApplicationKafkaSettings {
 	config: KafkaConfig;
 	consumer: ConsumerConfig;
 	producer: ProducerConfig;
+}
+
+export interface ServerConfig {
+	address: string;
+	port: number;
+	contentType?: string;
+	logger?: any;
+	fastifyOpts?: fastify.RouteShorthandOptions;
+}
+
+export interface ServerInterface {
+	start(): Promise<void>;
+	stop(): Promise<void>;
+}
+
+export interface ServerHttpRoute {
+	url: string;
+	method: HTTPMethod | HTTPMethod[];
+	handler?: RequestHandler;
 }
 
 export interface DatabaseConfig {
@@ -233,18 +276,11 @@ export interface DatabaseSetup {
 }
 
 export interface DatabaseClient {
-	dbConnect(): Promise<void>;
+	connect(): Promise<this>;
 	query(query: string): Promise<any>;
 	execute(query: string, params: Array<any> | string): Promise<any>;
-	close(): Promise<void>;
+	disconnect(): Promise<void>;
 }
-
-// export interface DatabaseClient {
-// 	connectionString: string;
-// 	connectionConfig: any;
-// 	connection: any;
-// 	dbConnect(): Promise<void>;
-// }
 
 export interface DatabaseConsumer {
 	connectionString: string;

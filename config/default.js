@@ -4,6 +4,24 @@ module.exports = {
 			brokers: 'localhost:9092',
 			clientId: 'metamorphosis',
 			logLevel: 0,
+			// Time in milliseconds to wait for a successful connection. Default is 1000
+			connectionTimeout: 3000,
+			// Time in milliseconds to wait for a successful request. Default is 30000
+			requestTimeout: 10000,
+			// authenticationTimeout: 1000,
+			// reauthenticationThreshold: 10000,
+			// ssl: true,
+			// sasl: {
+			// 	mechanism: 'aws',
+			// 	authorizationIdentity: 'AIDAIOSFODNN7EXAMPLE', // UserId or RoleId
+			// 	accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+			// 	secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+			// },
+			// If the max number of retries is exceeded the retrier will throw KafkaJSNumberOfRetriesExceeded and interrupt. Producers will bubble up the error to the user code; Consumers will wait the retry time attached to the exception (it will be based on the number of attempts) and perform a full restart.
+			// retry: {
+			// 	initialRetryTime: 100,
+			// 	retries: 8,
+			// },
 		},
 		consumer: {
 			// Default consumer topic
@@ -53,10 +71,10 @@ module.exports = {
 			},
 		},
 	},
-	webhooks: {
+	server: {
 		log: false,
 		port: 3000,
-		route: '/',
+		address: '0.0.0.0',
 		opts: {},
 	},
 };

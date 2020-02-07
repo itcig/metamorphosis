@@ -1,8 +1,8 @@
 import { Application } from '../../types/types';
-import Consumers from './consumers';
-import Producers from './producers';
+import consumers from './consumers';
+import producers from './producers';
 
 export default function(app: Application): void {
-	app.configure(Consumers);
-	app.configure(Producers);
+	app.configure(consumers);
+	app.configure(producers);
 }

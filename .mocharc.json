@@ -15,7 +15,7 @@
   ],
   "reporter": "spec",
   "slow": 75,
-  "timeout": 30000,
+  "timeout": 5000,
   "watch-files": [
     "src/**/*.js",
     "src/**/*.ts",
