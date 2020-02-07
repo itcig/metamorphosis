@@ -2,39 +2,37 @@
 
 import deepmerge from 'deepmerge';
 
+const numTestMessages = 1000;
+
 const globalTestConfig = {
 	kafka: {
 		config: {
-			kafka: {
-				brokers: 'localhost:9092',
-				clientId: 'metamorphosis-test-client',
-			},
+			brokers: 'localhost:9092',
+			clientId: 'metamorphosis-test-client',
 		},
 	},
 };
 
 const simpleConsumerConfig = deepmerge(globalTestConfig, {
 	kafka: {
-		topics: {
-			consumer: 'metamorphosis-test-simple',
+		consumer: {
+			topic: 'metamorphosis-test-simple',
+			groupId: `simple-consumer-${Date.now()}`,
 		},
-		config: {
-			consumer: {
-				groupId: `simple-consumer-${Date.now()}`,
-			},
+		producer: {
+			topic: 'metamorphosis-test-simple',
 		},
 	},
 });
 
 const mysqlConsumerConfig = deepmerge(globalTestConfig, {
 	kafka: {
-		topics: {
-			consumer: 'metamorphosis-test-mysql',
+		consumer: {
+			topic: 'metamorphosis-test-mysql',
+			groupId: `mysql-consumer-${Date.now()}`,
 		},
-		config: {
-			consumer: {
-				groupId: `simple-consumer-${Date.now()}`,
-			},
+		producer: {
+			topic: 'metamorphosis-test-mysql',
 		},
 	},
 });
@@ -42,4 +40,5 @@ const mysqlConsumerConfig = deepmerge(globalTestConfig, {
 module.exports = {
 	simpleConsumerConfig,
 	mysqlConsumerConfig,
+	numTestMessages,
 };

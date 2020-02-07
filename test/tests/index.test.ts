@@ -1,13 +1,9 @@
 import assert from 'assert';
 import Debug from 'debug';
-import { Message, logLevel } from 'kafkajs';
+import { Message } from 'kafkajs';
 import waitFor from 'kafkajs/src/utils/waitFor';
-import metamorphosis, { configuration, consumers, producers } from '../../src';
-import { MysqlConsumer } from '../../src/application/services/consumers';
-// import { MysqlPoolDatabaseAdapater } from '../../src/database-adapters/';
+import metamorphosis, { configuration, consumer, mysqlPoolDatabaseAdapater, producer } from '../../src';
 import { Application } from '../../src/types/types';
-// import { SingleTopicConsumer } from '../../src/consumers';
-// import { DatabaseMysqlPoolClient } from '../../src/database/clients';
 
 const debug = Debug('metamorphosis:test');
 
@@ -16,7 +12,7 @@ const config = require('../config');
 // TODO: Update this config to mirror new structure
 const { simpleConsumerConfig, mysqlConsumerConfig } = config;
 
-const getRandomNumber = (): number => Math.round(Math.random() * 1000);
+const getRandomNumber = (): number => Math.round(Math.random() * (config.numTestMessages || 10)) || 1;
 
 const createMessage = (num: number): Message => ({
 	key: Buffer.from(`key-${num}`),
@@ -34,11 +30,11 @@ describe('Single Topic Consumer', () => {
 		const app: Application = metamorphosis();
 
 		// Load app configuration
-		app.configure(configuration());
+		app.configure(configuration(simpleConsumerConfig));
 
 		// Set up our services
-		app.configure(consumers);
-		app.configure(producers);
+		app.configure(consumer);
+		app.configure(producer);
 
 		const consumedMessages: Message[] = [];
 		let firstMessageReceived = false;
@@ -49,28 +45,27 @@ describe('Single Topic Consumer', () => {
 			.map(() => createMessage(getRandomNumber()));
 
 		before(async () => {
-			app.services.defaultConsumer.setConfig({
-				...simpleConsumerConfig,
-				messageHandler: (message: Message) => {
-					consumedMessages.push(message);
-					if (!firstMessageReceived) {
-						firstMessageReceived = true;
-					}
-				},
-			});
-
-			await app.services.defaultConsumer.start();
+			await app.services.consumer
+				.setConfig({
+					messageHandler: (message: Message) => {
+						consumedMessages.push(message);
+						if (!firstMessageReceived) {
+							firstMessageReceived = true;
+						}
+					},
+				})
+				.start();
 		});
 
 		after(async () => {
-			await app.services.defaultConsumer.stop();
+			await app.kill();
 		});
 
 		it(`should be able to produce ${testMessages.length} messages`, async () => {
 			try {
-				await app.services.defaultProducer.start();
+				await app.services.producer.start();
 
-				await app.services.defaultProducer.sendMessages(testMessages);
+				await app.services.producer.sendMessages(testMessages);
 
 				debug(`First consumed message (of ${consumedMessages.length})`, consumedMessages[0]);
 
@@ -110,6 +105,8 @@ describe('Single Topic Consumer', () => {
 				// consumedMessages.map(m => m.offset),
 				// testMessages.map((_, i) => `${i}`),
 			);
+
+			return;
 		});
 
 		// it(`should be able to produce 1 failed message`, async () => {
@@ -125,10 +122,13 @@ describe('Single Topic Consumer', () => {
 
 		it('should be able to wait', done => {
 			const messagesChecker = setInterval(() => {
+				// console.log('consumed num', consumedMessages.length);
 				if (consumedMessages.length > 1) {
-					clearInterval(messagesChecker);
-					done();
+					assert.ok(true);
 				}
+
+				clearInterval(messagesChecker);
+				done();
 			}, 100);
 		});
 
@@ -150,11 +150,22 @@ describe('Database Consumer', () => {
 		const app: Application = metamorphosis();
 
 		// Load app configuration
-		app.configure(configuration());
+		app.configure(configuration(mysqlConsumerConfig));
 
 		// Set up our services
-		app.configure(consumers);
-		app.configure(producers);
+		app.configure(consumer);
+		app.configure(producer);
+
+		// Below two statements only needed for test, normally this would be set in env and configured at load
+		if (mysqlConsumerConfig.database && mysqlConsumerConfig.database.mysql) {
+			app.merge('config.database.mysql', mysqlConsumerConfig.database.mysql);
+		}
+
+		// Reconfigure MysqlConsumer after updating config
+		app.configure(mysqlPoolDatabaseAdapater());
+
+		// Configure MySql adapater
+		const databaseClient = app.get('database');
 
 		const dbInserts: any[] = [];
 		const consumedMessages: Message[] = [];
@@ -168,24 +179,14 @@ describe('Database Consumer', () => {
 			.map(() => createMessage(getRandomNumber()));
 
 		before(async () => {
-			// Below two statements only needed for test, normally this would be set in env and configured at load
-			if (mysqlConsumerConfig.database && mysqlConsumerConfig.database.mysql) {
-				app.merge('database.mysql', mysqlConsumerConfig.database.mysql);
-			}
-
-			// Reconfigure MysqlConsumer after updating config
-			app.configure(MysqlConsumer);
+			// Connect to DB
+			await databaseClient.connect();
 
 			// Set config for Mysql Consumer
-			app.services.mysqlConsumer.setConfig({
-				...mysqlConsumerConfig,
-				// queries: (message: Message) => [[`insert into messages (message) values (?)`, [JSON.stringify(message)]]];
-
-				// Use standard function so `this` refers to the consumer class which is passed in at runtime
-				messageHandler: async function(message: Message): Promise<void> {
+			app.services.consumer.setConfig({
+				messageHandler: async (message: Message): Promise<void> => {
 					consumedMessages.push(message);
-
-					const result = await this.execute(`insert into messages (message) values (?)`, [JSON.stringify(message)]);
+					const result = await databaseClient.execute(`insert into messages (message) values (?)`, [JSON.stringify(message)]);
 					dbInserts.push(result);
 				},
 			});
@@ -200,44 +201,41 @@ describe('Database Consumer', () => {
 			// });
 
 			// Start the consumer
-			await app.services.mysqlConsumer.start();
+			await app.services.consumer.start();
 		});
 
 		after(async () => {
-			await app.services.mysqlConsumer.stop();
+			await app.kill();
 		});
 
 		it(`should be able to connect to the database`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-			await databaseClient.dbConnect();
+			await databaseClient.connect();
 			assert.ok(true);
+			return;
 		});
 
 		it(`should be able to view the database`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-			const [rows, fields] = await databaseClient.query('show databases');
+			const [rows] = await databaseClient.query('show databases');
 			assert.ok(rows);
+			return;
 		});
 
 		it(`should be able to query the database`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-
 			const start = +new Date();
 
 			const queryResultSingle = await databaseClient.query('select sleep(0.5)');
 
-			const [rows, fields] = await databaseClient.query('select max(id) as maxId from messages');
+			const [rows] = await databaseClient.query('select max(id) as maxId from messages');
 
 			startingTableId = rows[0].maxId || 0;
 
 			const end = +new Date();
 
 			assert.ok(queryResultSingle, `Query executed in ${end - start}ms`);
+			return;
 		});
 
 		it(`should be able to run concurrent pool queries`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-
 			const start = +new Date();
 
 			const queryResultParallel = await Promise.all([
@@ -248,13 +246,14 @@ describe('Database Consumer', () => {
 			const end = +new Date();
 
 			assert.ok(queryResultParallel, `Queries executed in ${end - start}ms`);
+			return;
 		});
 
 		it(`should be able to insert ${testMessages.length} messages`, async () => {
 			try {
-				await app.services.defaultProducer.start();
+				await app.services.producer.start();
 
-				await app.services.defaultProducer.sendMessages(testMessages);
+				await app.services.producer.sendMessages(testMessages);
 
 				debug(`First consumed message (of ${consumedMessages.length})`, consumedMessages[0]);
 
@@ -271,21 +270,22 @@ describe('Database Consumer', () => {
 			const numInsertedRows = dbInserts.map(row => row[0].affectedRows).reduce((total, numInserts) => total + numInserts, 0);
 
 			assert.equal(numInsertedRows, testMessages.length);
+			return;
 		});
 
 		it(`should be able to read ${testMessages.length} messages from database`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-			const [rows, fields] = await databaseClient.execute('select count(0) as num from messages where id > ?', [startingTableId]);
+			const [rows] = await databaseClient.execute('select count(0) as num from messages where id > ?', [startingTableId]);
 			assert.equal(rows[0].num, testMessages.length);
+			return;
 		});
 
 		it(`should be able to close the database connection`, async () => {
-			const databaseClient = app.get('mysqlAdapter');
-			await databaseClient.close();
+			await databaseClient.disconnect();
 
 			const databaseConnection = databaseClient.connection;
 
 			assert.ok(databaseConnection.pool._closed);
+			return;
 		});
 	});
 });
