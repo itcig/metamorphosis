@@ -5,8 +5,8 @@ import { get, set } from 'lodash';
 // import events from './events';
 // import hooks from './hooks';
 
-import { Application, ServiceMethods, ServiceTypes, SetupMethod } from '../types/types';
-import { Server } from '../server';
+import { Application, ApplicationSettings, ServiceMethods, ServiceTypes, SetupMethod } from '../types/types';
+import { ApplicationServer } from '../server/server';
 
 const debug = Debug('metamorphosis:app');
 const { version } = require('../../package.json');
@@ -18,7 +18,7 @@ export default class App implements Application {
 	services: {} = {};
 	providers: any[] = [];
 	_isSetup = false;
-	settings: {} = {};
+	settings: ApplicationSettings = {};
 	// defaultService?: DefaultService = new DefaultService({});
 
 	init(): void {
@@ -82,12 +82,13 @@ export default class App implements Application {
 		return this;
 	}
 
-	server(): any | void {
-		const server = this.get('server');
-		if (server) {
-			return server.get();
-		}
-	}
+	// server(): ApplicationServer {
+	// 	return this.get('server');
+	// }
+
+	// listen(): void {
+	// 	this.get('server');
+	// }
 
 	service(serviceName: string): keyof ServiceTypes {
 		// extends never ? any : never {
@@ -141,5 +142,27 @@ export default class App implements Application {
 		this._isSetup = true;
 
 		return this;
+	}
+
+	async kill(): Promise<void> {
+		try {
+			// Kill database connections
+			Debug('metamorphosis:app:verbose')(`Kill DB`, this.get('database'));
+			this.get('database') && this.get('database').disconnect();
+
+			// Kill running server
+			Debug('metamorphosis:app:verbose')(`Kill Server`, this.get('server'));
+			this.get('server') && this.get('server').stop();
+
+			// Kill running service connections
+			for (const serviceName of Object.keys(this.services)) {
+				Debug('metamorphosis:app:verbose')(`Kill Service ${serviceName}`, this.services[serviceName]);
+				try {
+					this.services[serviceName] && this.services[serviceName].stop();
+				} catch (err) {}
+			}
+		} catch (err) {
+			Debug('metamorphosis:error')(`Encountered a problem shutting app down`, err);
+		}
 	}
 }
