@@ -1,6 +1,9 @@
+import Debug from 'debug';
 import { ServerConfig } from '../types/types';
 
-export class Server {
+const debugError = Debug('metamorphosis:error:server:http');
+
+export class ApplicationServer {
 	server?: any;
 
 	/** The hostname/IP this server will listen on */
@@ -22,12 +25,19 @@ export class Server {
 		this.port = serverConfig.port || 3000;
 	}
 
-	// async dbConnect(): Promise<void> {
-	// 	console.error('Error: Attempting to connect to database interface instead of specific client');
-	// 	return;
-	// }
+	/**
+	 * Start server
+	 */
+	async start(): Promise<void> {
+		debugError(`Cannot start base Server adapater, this object must be extended`);
+		return;
+	}
 
-	get(): any {
-		return this.server;
+	/**
+	 * Close server
+	 */
+	async stop(): Promise<void> {
+		debugError(`Cannot stop base Server adapater, where are your children!?!`);
+		return;
 	}
 }
