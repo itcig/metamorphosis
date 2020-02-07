@@ -16,9 +16,4 @@ export class DatabaseBaseClient implements DatabaseSetup {
 		this.connectionString = connectionString;
 		this.connectionConfig = config;
 	}
-
-	// async dbConnect(): Promise<void> {
-	// 	console.error('Error: Attempting to connect to database interface instead of specific client');
-	// 	return;
-	// }
 }

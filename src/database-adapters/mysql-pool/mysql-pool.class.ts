@@ -13,7 +13,7 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 		super(databaseConfig);
 	}
 
-	async dbConnect(): Promise<void> {
+	async connect(): Promise<this> {
 		try {
 			this.connection = mysqlClient.createPool(this.connectionConfig);
 
@@ -24,6 +24,16 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 		} catch (err) {
 			console.error('MySql connection error:', err);
 		}
+
+		return this;
+	}
+
+	/**
+	 * Close connection
+	 */
+	async disconnect(): Promise<void> {
+		this.connection.end();
+		debug('MySql connection closed');
 	}
 
 	/**
@@ -63,12 +73,5 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 		} catch (err) {
 			console.error(err.message);
 		}
-	}
-
-	/**
-	 * Close connection
-	 */
-	async close(): Promise<void> {
-		this.connection.end();
 	}
 }
