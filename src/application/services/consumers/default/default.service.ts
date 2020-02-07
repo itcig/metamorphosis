@@ -7,7 +7,7 @@ import { Application, DefaultConsumerServiceOptions } from '../../../../types/ty
 // Add this service to the service type index
 declare module '../../../../types/types' {
 	interface ConsumerTypes {
-		DefaultConsumer: DefaultConsumerService;
+		Consumer: DefaultConsumerService;
 	}
 }
 
@@ -23,14 +23,14 @@ export default function(app: Application): void {
 	} = kafkaSettings || { consumer: { topic: {} } };
 
 	const options: DefaultConsumerServiceOptions = {
-		id: 'defaultConsumer',
+		id: 'consumer',
 		kafkaSettings,
 		topic: defaultTopic,
 	};
 
 	// Initialize our service with any options it requires
 	// TODO: Define route that can be produced to
-	app.use('defaultConsumer', new DefaultConsumerService(options, app));
+	app.use('consumer', new DefaultConsumerService(options, app));
 
 	// Get our initialized service so that we can register hooks
 	// const service = app.service('defaultConsumer');

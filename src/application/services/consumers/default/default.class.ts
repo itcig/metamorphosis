@@ -23,26 +23,12 @@ export class DefaultConsumerService extends ConsumerService {
 	}
 
 	/**
-	 * Connect to both producer and consumer
-	 */
-	async start(): Promise<void> {
-		// await Promise.all([this.startProducer(), this.startConsumer()]);
-		await this.startConsumer();
-	}
-
-	/**
 	 * Start consumer, subscribe to our topic and listen for batches of messages.
 	 * Run message callback on every message recieved and write any errors to a new Kafka topic.
 	 */
-	async startConsumer(): Promise<void> {
-		const topic = this.getTopic();
-
-		await this.getConsumer().connect();
-		await this.getConsumer().subscribe({
-			topic,
-		});
-
-		console.log(`\n${String.fromCodePoint(0x1f6a6)} SUBSCRIBING TO TOPIC ${topic} WITH GROUP ${this.getGroupId()}:\n`);
+	async start(): Promise<this> {
+		// Run initial consumer connect and subscribe
+		await super.start();
 
 		/**
 		 * Batch message
@@ -76,7 +62,7 @@ export class DefaultConsumerService extends ConsumerService {
 					try {
 						await this.getMessageHandler().call(this as DefaultConsumerService, message);
 					} catch (err) {
-						debugErrors('metamorphosis.errors', JSON.stringify(err, null, 2));
+						debugErrors(err);
 						// console.error(err);
 						// TODO: Log error messages using an ErrorProducer service
 						// errorMessages.push({
@@ -110,5 +96,7 @@ export class DefaultConsumerService extends ConsumerService {
 				// }
 			},
 		});
+
+		return this;
 	}
 }

@@ -39,6 +39,22 @@ export class ConsumerService extends Service {
 	}
 
 	/**
+	 * Connect to consumer with configured topic
+	 */
+	async start(): Promise<any> {
+		const topic = this.getTopic();
+
+		await this.getConsumer().connect();
+		await this.getConsumer().subscribe({
+			topic,
+		});
+
+		Debug('metamorphosis:runtime')(
+			`${String.fromCodePoint(0x1f6a6)} Subscribing to topic ${this.getTopic()} with group ${this.getGroupId()}`
+		);
+	}
+
+	/**
 	 * Disconnect from both producer and consumer
 	 */
 	async stop(): Promise<void> {

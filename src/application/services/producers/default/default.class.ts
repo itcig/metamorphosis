@@ -16,14 +16,9 @@ export class DefaultProducerService extends ProducerService {
 	/**
 	 * Connect to both producer and consumer
 	 */
-	async start(): Promise<void> {
-		await this.startProducer();
-	}
-
-	/**
-	 * Start just producer
-	 */
-	async startProducer(): Promise<void> {
+	async start(): Promise<any> {
 		await this.getProducer().connect();
+
+		return this;
 	}
 }
