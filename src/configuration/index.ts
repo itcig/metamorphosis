@@ -2,9 +2,11 @@
 import { Application } from '../types/types';
 import Debug from 'debug';
 import path from 'path';
+import deepmerge from 'deepmerge';
 import config from 'config';
 import * as DotEnv from 'dotenv';
 import parseEnvValue from '../utils/parse-env-value';
+import { GenericOptions, InitFunction } from '../types/types';
 
 // Load config from dotenv
 DotEnv.config();
@@ -19,14 +21,8 @@ const debug = Debug('metamorphosis:config');
 // 	Debug.enable('metamorphosis:app');
 // }
 
-export default function init(): (
-	app?: Application<{}>
-) => {
-	[key: string]: any;
-};
-
-export default function init() {
-	return (app?: Application) => {
+export default function init(opts?: GenericOptions): InitFunction {
+	return (app?: Application): { [key: string]: any } => {
 		const convert = (current: any): any => {
 			const result: { [key: string]: any } = Array.isArray(current) ? [] : {};
 
@@ -61,7 +57,7 @@ export default function init() {
 		};
 
 		const env = config.util.getEnv('NODE_ENV');
-		const conf = convert(config);
+		const conf = config.util.extendDeep(convert(config), opts);
 
 		if (!app) {
 			return conf;
@@ -71,8 +67,8 @@ export default function init() {
 
 		Object.keys(conf).forEach(name => {
 			const value = conf[name];
-			debug(`Setting '${name}' configuration value to`, value);
-			app && app.set(name, value);
+			Debug('metamorphosis:config:verbose')(`Setting '${name}' configuration value to`, value);
+			app && app.set(`config.${name}`, value);
 		});
 
 		return conf;
