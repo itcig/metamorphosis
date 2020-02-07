@@ -1,2 +1,2 @@
-export { default as DatabaseAdapter } from './adapter';
-export { default as MysqlPoolDatabaseAdapater } from './mysql-pool/mysql-pool';
+export { default as DatabaseBaseClient } from './adapter';
+export { default as mysqlPoolDatabaseAdapater } from './mysql-pool/mysql-pool';

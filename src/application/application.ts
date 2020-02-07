@@ -6,6 +6,7 @@ import { get, set } from 'lodash';
 // import hooks from './hooks';
 
 import { Application, ServiceMethods, ServiceTypes, SetupMethod } from '../types/types';
+import { Server } from '../server';
 
 const debug = Debug('metamorphosis:app');
 const { version } = require('../../package.json');
@@ -79,6 +80,13 @@ export default class App implements Application {
 		callback.call(this, this);
 
 		return this;
+	}
+
+	server(): any | void {
+		const server = this.get('server');
+		if (server) {
+			return server.get();
+		}
 	}
 
 	service(serviceName: string): keyof ServiceTypes {

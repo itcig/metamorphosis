@@ -1,6 +1,6 @@
 import Debug from 'debug';
 import { ConsumerService } from '../consumer.class';
-import { MysqlPoolDatabaseAdapater } from '../../../../database-adapters';
+import { mysqlPoolDatabaseAdapater } from '../../../../database-adapters';
 import { DatabaseMysqlPoolClient } from '../../../../database-adapters/mysql-pool/mysql-pool.class';
 import { Application, MysqlConsumerServiceOptions } from '../../../../types/types';
 
@@ -26,7 +26,7 @@ export class MysqlConsumerService extends ConsumerService {
 
 		this.mysqlConsumerOptions = options;
 
-		app.configure(MysqlPoolDatabaseAdapater);
+		app.configure(mysqlPoolDatabaseAdapater);
 
 		this.databaseClient = app.get('mysqlAdapter');
 
