@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import fastify, { HTTPMethod, RequestHandler } from 'fastify';
-import { KafkaConfig, ConsumerConfig, ProducerConfig, Message, Kafka } from 'kafkajs';
+import { KafkaConfig, ConsumerConfig, ProducerConfig, Message, Kafka, RecordMetadata } from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
 import * as http from 'http';
@@ -170,7 +170,9 @@ export interface ProducerServiceOptions extends ServiceOptions {
 
 export declare class ProducerService<T = any> extends Service<T> implements ServiceMethods<T> {
 	options: ProducerServiceOptions;
-	constructor(options: ConsumerServiceOptions);
+	constructor(options: ProducerServiceOptions);
+	send(message: Message): Promise<RecordMetadata[]>;
+	sendMessages(messages: Message[]): Promise<RecordMetadata[]>;
 }
 
 export type DefaultProducerServiceOptions = ProducerServiceOptions;
