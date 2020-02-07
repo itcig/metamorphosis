@@ -13,7 +13,7 @@ declare module '../../../../types/types' {
 
 export default function(app: Application): void {
 	// Get Kafka settings
-	const kafkaSettings = app.get('kafka');
+	const kafkaSettings = app.get('config.kafka');
 
 	// Get default consumer topic
 	const {

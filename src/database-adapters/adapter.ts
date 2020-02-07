@@ -11,8 +11,6 @@ export class DatabaseBaseClient implements DatabaseSetup {
 	// connection: any;
 
 	constructor(databaseConfig: DatabaseConfig) {
-		// const databaseConfig = app.get('database');
-
 		const { connectionString, config } = databaseConfig;
 
 		this.connectionString = connectionString;

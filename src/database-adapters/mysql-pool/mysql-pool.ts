@@ -5,7 +5,7 @@ import { Application, DatabaseConfig } from '../../types/types';
 const debugErrors = Debug('metamorphosis.errors');
 
 export default function(app: Application): void {
-	const databaseConfig = app.get('database');
+	const databaseConfig = app.get('config.database');
 
 	const {
 		mysql: { config: mysqlPoolConfig },

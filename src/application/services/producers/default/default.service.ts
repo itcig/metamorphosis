@@ -14,7 +14,7 @@ declare module '../../../../types/types' {
 // TODO: Allow passing in 2nd arg for options that will get merged with defaults
 export default function(app: Application): void {
 	// Get Kafka config
-	const kafkaSettings = app.get('kafka');
+	const kafkaSettings = app.get('config.kafka');
 
 	// Get default consumer topic
 	const {
