@@ -23,6 +23,7 @@ export default function(app: Application): void {
 
 	const options: DefaultProducerServiceOptions = {
 		id: 'producer',
+		type: 'producer',
 		kafkaSettings,
 		topic: defaultTopic,
 	};

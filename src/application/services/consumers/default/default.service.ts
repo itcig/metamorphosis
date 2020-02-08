@@ -1,6 +1,6 @@
 // Initializes the `defaultConsumer` service
 import { DefaultConsumerService } from './default.class';
-import { Application, DefaultConsumerServiceOptions } from '../../../../types/types';
+import { Application, DefaultConsumerServiceOptions, ConsumerTypes } from '../../../../types/types';
 
 // import hooks from './default.hooks';
 
@@ -24,6 +24,7 @@ export default function(app: Application): void {
 
 	const options: DefaultConsumerServiceOptions = {
 		id: 'consumer',
+		type: 'consumer',
 		kafkaSettings,
 		topic: defaultTopic,
 	};

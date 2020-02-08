@@ -144,6 +144,7 @@ export type InitFunction = (
 export interface ServiceOptions {
 	id: string;
 	events?: string[];
+	type?: string;
 	kafkaSettings: ApplicationKafkaSettings;
 	[x: string]: any; // indexer allows overloading child interfaces
 }
@@ -198,7 +199,6 @@ export declare class DefaultProducerService<T = any> extends ProducerService<T> 
 export interface ConsumerServiceOptions extends ServiceOptions {
 	topic: string;
 	messageHandler?: ConsumerMessageCallback;
-	multiTopic?: string[];
 }
 
 export declare class ConsumerService<T = any> extends Service<T> implements ServiceMethods<T> {
