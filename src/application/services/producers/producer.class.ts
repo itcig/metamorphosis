@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import { Message, Producer, ProducerRecord, RecordMetadata } from 'kafkajs';
+import { CompressionTypes, Message, Producer, ProducerRecord, RecordMetadata, ProducerBatch, TopicMessages } from 'kafkajs';
 import { Service } from '../service.class';
 import { Application, ProducerServiceOptions } from '../../../types/types';
 
@@ -65,10 +65,37 @@ export class ProducerService extends Service {
 			topic,
 			messages,
 			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
+			timeout: this.options.timeout || 30000,
+			compression: CompressionTypes.None,
 		};
 
 		try {
 			const response = await this.getProducer().send(producerRecord);
+
+			debug('Done producing');
+
+			return response;
+		} catch (err) {
+			debugError(`Error producing message: %o`, err);
+			throw err;
+		}
+	}
+
+	/**
+	 * Send messages to multiple topics
+	 *
+	 * @param topicMessages Array of TopicMessages which contain a `topic` key and `messages` key as the same array of messages that would be passed to `sendMessages()`
+	 */
+	async sendBatch(topicMessages: TopicMessages[]): Promise<RecordMetadata[]> {
+		const producerBatch: ProducerBatch = {
+			topicMessages,
+			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
+			timeout: this.options.timeout || 30000,
+			compression: CompressionTypes.None,
+		};
+
+		try {
+			const response = await this.getProducer().sendBatch(producerBatch);
 
 			debug('Done producing');
 
