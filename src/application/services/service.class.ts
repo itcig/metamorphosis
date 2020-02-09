@@ -3,7 +3,7 @@ import Debug from 'debug';
 import { Kafka } from 'kafkajs';
 import { get } from 'lodash';
 import deepmerge from 'deepmerge';
-import { Application, Id, ServiceMethods, ServiceOptions } from '../../types/types';
+import { Application, Id, ServiceMethods, ServiceOptions, ServiceTypes } from '../../types/types';
 
 const debug = Debug('metamorphosis:app:service');
 
@@ -55,6 +55,10 @@ export class Service<T = any> implements ServiceMethods<T> {
 
 	get id(): Id {
 		return this.options.id;
+	}
+
+	get type(): string {
+		return this.options.type || '';
 	}
 
 	get events(): string[] {

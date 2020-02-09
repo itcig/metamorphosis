@@ -147,19 +147,21 @@ export default class App implements Application {
 	async kill(): Promise<void> {
 		try {
 			// Kill database connections
-			Debug('metamorphosis:app:verbose')(`Kill DB`, this.get('database'));
+			Debug('metamorphosis:app:verbose')(`Kill DB`, !!this.get('database'));
 			this.get('database') && this.get('database').disconnect();
 
 			// Kill running server
-			Debug('metamorphosis:app:verbose')(`Kill Server`, this.get('server'));
+			Debug('metamorphosis:app:verbose')(`Kill Server`, !!this.get('server'));
 			this.get('server') && this.get('server').stop();
 
 			// Kill running service connections
 			for (const serviceName of Object.keys(this.services)) {
-				Debug('metamorphosis:app:verbose')(`Kill Service ${serviceName}`, this.services[serviceName]);
+				Debug('metamorphosis:app:verbose')(`Kill Service '${serviceName}'`, !!this.services[serviceName]);
 				try {
 					this.services[serviceName] && this.services[serviceName].stop();
-				} catch (err) {}
+				} catch (err) {
+					Debug('metamorphosis:error')(`Error killing Service '${serviceName}'`, err);
+				}
 			}
 		} catch (err) {
 			Debug('metamorphosis:error')(`Encountered a problem shutting app down`, err);

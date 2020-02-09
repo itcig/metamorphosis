@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import { Message, Producer, ProducerRecord, RecordMetadata } from 'kafkajs';
+import { CompressionTypes, Message, Producer, ProducerRecord, RecordMetadata, ProducerBatch, TopicMessages } from 'kafkajs';
 import { Service } from '../service.class';
 import { Application, ProducerServiceOptions } from '../../../types/types';
 
@@ -46,29 +46,56 @@ export class ProducerService extends Service {
 	 * Send messages to producer topic. Messages are always sent as an array so this wrapper
 	 * is just a shortcut for sending an individual message
 	 */
-	async send(message: Message): Promise<RecordMetadata[]> {
+	async send(message: Message, overrideTopic?: string): Promise<RecordMetadata[]> {
 		// Build message array to send to kafkajs
 		const messages = [message];
 
 		// Send single
-		return await this.sendMessages(messages);
+		return await this.sendMessages(messages, overrideTopic);
 	}
 
 	/**
 	 * Send messages to producer topic
 	 */
-	async sendMessages(messages: Message[]): Promise<RecordMetadata[]> {
-		const topic = this.getTopic();
+	async sendMessages(messages: Message[], overrideTopic?: string): Promise<RecordMetadata[]> {
+		const topic = overrideTopic || this.getTopic();
 		debug(`Producing to topic (${topic})`, messages);
 
 		const producerRecord: ProducerRecord = {
 			topic,
 			messages,
 			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
+			timeout: this.options.timeout || 30000,
+			compression: CompressionTypes.None,
 		};
 
 		try {
 			const response = await this.getProducer().send(producerRecord);
+
+			debug('Done producing');
+
+			return response;
+		} catch (err) {
+			debugError(`Error producing message: %o`, err);
+			throw err;
+		}
+	}
+
+	/**
+	 * Send messages to multiple topics
+	 *
+	 * @param topicMessages Array of TopicMessages which contain a `topic` key and `messages` key as the same array of messages that would be passed to `sendMessages()`
+	 */
+	async sendBatch(topicMessages: TopicMessages[]): Promise<RecordMetadata[]> {
+		const producerBatch: ProducerBatch = {
+			topicMessages,
+			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
+			timeout: this.options.timeout || 30000,
+			compression: CompressionTypes.None,
+		};
+
+		try {
+			const response = await this.getProducer().sendBatch(producerBatch);
 
 			debug('Done producing');
 

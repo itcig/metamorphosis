@@ -1,8 +1,8 @@
 import Debug from 'debug';
-import fastify, { FastifyInstance, RouteOptions } from 'fastify';
+import fastify, { FastifyInstance, RouteOptions, HTTPMethod } from 'fastify';
 import * as http from 'http';
 import { ApplicationServer } from '../server';
-import { ServerConfig, ServerInterface } from '../../types/types';
+import { ServerConfig, ServerInterface, ProducerService, GenericOptions } from '../../types/types';
 
 const debug = Debug('metamorphosis:server:http');
 const debugError = Debug('metamorphosis:error:server:http');
@@ -43,28 +43,8 @@ export class HttpServer extends ApplicationServer implements ServerInterface {
 
 		debug(`Setting route for '${url}'`);
 
+		// Lookup default fastify options from config
 		const opts: RouteOptions = this.options.fastifyOpts || {};
-
-		// const emptyhandler = async (request, reply): Promise<any> => {
-		// 	debug(reply.res); // this is the http.ServerResponse with correct typings!
-
-		// 	debugError(`No callback provided for route '${route}'`);
-		// 	// try {
-		// 	// 	const recordMeta = await this.send({
-		// 	// 		value: request.body,
-		// 	// 	});
-
-		// 	// 	// Send back a success reponse
-		// 	// 	reply
-		// 	// 		.type(contentType)
-		// 	// 		.code(200)
-		// 	// 		.send(JSON.stringify(recordMeta, null, 2));
-		// 	// } catch (err) {
-		// 	// 	debugError(err);
-		// 	// 	// Send back a success reponse
-		// 	// 	return reply.send(500);
-		// 	// }
-		// };
 
 		// Add all routes to array for referencing outside this class
 		this.routes = [...this.routes, [url, routeOptions]];
@@ -72,6 +52,11 @@ export class HttpServer extends ApplicationServer implements ServerInterface {
 		// If empty, then add default handler to alert of error
 		if (!routeOptions.handler) {
 			routeOptions.handler = (): void => debugError(`No callback provided for route '${url}'`);
+		}
+
+		// Set default HTTP method if not passed in any way
+		if (!routeOptions.method && !opts.method) {
+			routeOptions.method = 'GET';
 		}
 
 		// Merge basic route params with any other Fastify options or config
@@ -83,6 +68,44 @@ export class HttpServer extends ApplicationServer implements ServerInterface {
 
 		// Install our route
 		this.server.route(mergedRouteOptions);
+
+		return this;
+	}
+
+	setProducerRoute(
+		url: string,
+		routeOptions: Partial<RouteOptions>,
+		producer: ProducerService,
+		responseOptions: GenericOptions = {}
+	): this {
+		routeOptions.handler = async (request, reply): Promise<void> => {
+			try {
+				const recordMeta = await producer.send({
+					// value: Buffer.from(
+					// 	JSON.stringify(request.body),
+					// 	'utf8'
+					// ),
+					value: JSON.stringify(request.body),
+				});
+
+				// Set content-type header if passed
+				if (responseOptions.contentType) {
+					reply.type(responseOptions.contentType);
+				}
+
+				debug(`Record produced`, JSON.stringify(recordMeta));
+
+				// TODO: What should be sent back? How should this be set in arguments?
+				// Send back a success reponse
+				reply.code(200).send(true);
+			} catch (err) {
+				debug(err);
+				reply.send(500);
+			}
+		};
+
+		// Install route
+		this.setRoute(url, routeOptions);
 
 		return this;
 	}
