@@ -1,8 +1,5 @@
-import Debug from 'debug';
 import { ConsumerService } from '../consumer.class';
 import { Application, DefaultConsumerServiceOptions } from '../../../../types/types';
-
-const debugErrors = Debug('metamorphosis:errors:consumer');
 
 export class DefaultConsumerService extends ConsumerService {
 	/** Service options for this consumer */
@@ -51,18 +48,20 @@ export class DefaultConsumerService extends ConsumerService {
 		 *	}
 		 */
 		await this.getConsumer().run({
+			// Allow batch to fail in the middle without committing all offsets
 			eachBatchAutoResolve: false,
-			// TODO: Allow setting a batch handler to allow for more advanced callbacks with partitions and topics
-			eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }) => {
-				for (const message of batch.messages) {
-					if (!isRunning() || isStale()) break;
+			eachBatch:
+				this.getBatchHandler() ||
+				(async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
+					for (const message of batch.messages) {
+						if (!isRunning() || isStale()) break;
 
-					await this.getMessageHandler().call(this as DefaultConsumerService, message);
+						await this.getMessageHandler().call(this as DefaultConsumerService, message);
 
-					resolveOffset(message.offset);
-					await heartbeat();
-				}
-			},
+						resolveOffset(message.offset);
+						await heartbeat();
+					}
+				}),
 		});
 
 		return this;
