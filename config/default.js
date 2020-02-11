@@ -28,6 +28,8 @@ module.exports = {
 			topic: '',
 			// Consumer group Kafka will track current offset for
 			groupId: 'metamorphosis-consumer-group',
+			// Whether the topic should consume from the first or latest offset if none are found for consumer group. Default is `false`.
+			fromBeginning: false,
 			// Timeout in milliseconds used to detect failures. The consumer sends periodic heartbeats to indicate its liveness to the broker. If no heartbeats are received by the broker before the expiration of this session timeout, then the broker will remove this consumer from the group and initiate a rebalance
 			sessionTimeout: 30000,
 			// The maximum time that the coordinator will wait for each member to rejoin when rebalancing the group

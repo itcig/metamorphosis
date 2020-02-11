@@ -1,9 +1,5 @@
-import Debug from 'debug';
 import { ConsumerService } from '../consumer.class';
 import { Application, DefaultConsumerServiceOptions } from '../../../../types/types';
-
-// const debug = Debug('metamorphosis:app:consumer:mysql');
-const debugErrors = Debug('metamorphosis:errors');
 
 export class DefaultConsumerService extends ConsumerService {
 	/** Service options for this consumer */
@@ -52,49 +48,20 @@ export class DefaultConsumerService extends ConsumerService {
 		 *	}
 		 */
 		await this.getConsumer().run({
+			// Allow batch to fail in the middle without committing all offsets
 			eachBatchAutoResolve: false,
-			eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }) => {
-				// const errorMessages: Array<Message> = [];
+			eachBatch:
+				this.getBatchHandler() ||
+				(async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
+					for (const message of batch.messages) {
+						if (!isRunning() || isStale()) break;
 
-				for (const message of batch.messages) {
-					if (!isRunning() || isStale()) break;
-
-					try {
 						await this.getMessageHandler().call(this as DefaultConsumerService, message);
-					} catch (err) {
-						debugErrors(err);
-						// console.error(err);
-						// TODO: Log error messages using an ErrorProducer service
-						// errorMessages.push({
-						// 	key: Buffer.from(batch.topic, 'utf8'),
-						// 	value: Buffer.from(
-						// 		JSON.stringify({
-						// 			timestamp: message.timestamp,
-						// 			topic: batch.topic,
-						// 			originalMessage: message,
-						// 			error: {
-						// 				code: err.code,
-						// 				message: err.message,
-						// 				trace: err.stack,
-						// 			},
-						// 		}),
-						// 		'utf8'
-						// 	),
-						// });
+
+						resolveOffset(message.offset);
+						await heartbeat();
 					}
-
-					resolveOffset(message.offset);
-					await heartbeat();
-				}
-
-				// Send error messages to error topic
-				// if (this.getConfig('topics.error')) {
-				// 	await this.getProducer().send({
-				// 		topic: this.getConfig('topics.error'),
-				// 		messages: errorMessages,
-				// 	});
-				// }
-			},
+				}),
 		});
 
 		return this;

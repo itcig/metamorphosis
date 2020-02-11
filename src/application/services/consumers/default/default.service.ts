@@ -19,14 +19,15 @@ export default function(app: Application): void {
 
 	// Get default consumer topic
 	const {
-		consumer: { topic: defaultTopic },
-	} = kafkaSettings || { consumer: { topic: {} } };
+		consumer: { topic: defaultTopic, fromBeginning },
+	} = kafkaSettings || { consumer: {} };
 
 	const options: DefaultConsumerServiceOptions = {
 		id: 'consumer',
 		type: 'consumer',
 		kafkaSettings,
 		topic: defaultTopic,
+		fromBeginning: fromBeginning,
 	};
 
 	// Initialize our service with any options it requires

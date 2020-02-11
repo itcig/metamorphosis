@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import { Consumer } from 'kafkajs';
 import { Service } from '../service.class';
-import { Application, ConsumerMessageCallback, ConsumerServiceOptions } from '../../../types/types';
+import { Application, ConsumerBatchCallback, ConsumerMessageCallback, ConsumerServiceOptions } from '../../../types/types';
 
 const debug = Debug('metamorphosis:app:consumer');
 
@@ -47,6 +47,7 @@ export class ConsumerService extends Service {
 		await this.getConsumer().connect();
 		await this.getConsumer().subscribe({
 			topic,
+			fromBeginning: !!this.options.fromBeginning,
 		});
 
 		Debug('metamorphosis:runtime')(
@@ -77,4 +78,6 @@ export class ConsumerService extends Service {
 	getTopic = (): string => this.options.topic;
 
 	getMessageHandler = (): ConsumerMessageCallback => this.options.messageHandler || (async (): Promise<void> => undefined);
+
+	getBatchHandler = (): ConsumerBatchCallback | undefined => this.options.batchHandler;
 }

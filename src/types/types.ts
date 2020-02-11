@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import fastify, { HTTPMethod, RequestHandler } from 'fastify';
-import { KafkaConfig, ConsumerConfig, ProducerConfig, Message, Kafka, RecordMetadata } from 'kafkajs';
+import { KafkaConfig, ConsumerConfig, EachBatchPayload, ProducerConfig, Message, Kafka, RecordMetadata } from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
 import * as http from 'http';
@@ -199,6 +199,7 @@ export declare class DefaultProducerService<T = any> extends ProducerService<T> 
 export interface ConsumerServiceOptions extends ServiceOptions {
 	topic: string;
 	messageHandler?: ConsumerMessageCallback;
+	batchHandler?: ConsumerBatchCallback;
 }
 
 export declare class ConsumerService<T = any> extends Service<T> implements ServiceMethods<T> {
@@ -312,6 +313,8 @@ export interface ProduceKafkaMessage {
 	timestamp?: number;
 	headers?: {};
 }
+
+export type ConsumerBatchCallback = (payload: EachBatchPayload) => Promise<void>;
 
 export type ConsumerMessageCallback = (message: Message) => Promise<void>;
 
