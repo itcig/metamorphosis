@@ -47,6 +47,7 @@ export class ConsumerService extends Service {
 		await this.getConsumer().connect();
 		await this.getConsumer().subscribe({
 			topic,
+			fromBeginning: !!this.options.fromBeginning,
 		});
 
 		Debug('metamorphosis:runtime')(

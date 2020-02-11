@@ -1,3 +1,11 @@
+/**
+ * This config overrides any defaults. Specify any values here that you want to hardcode
+ * for this application or required ENV variables that will be merged.
+ *
+ * There is no way to check these values are ENV placeholders so if you set something here
+ * and there is no corresponded ENV value, the placeholder will still be used over
+ * anything in default config.
+ */
 module.exports = {
 	kafka: {
 		config: {
