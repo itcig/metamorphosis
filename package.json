@@ -1,6 +1,6 @@
 {
   "name": "@metamorphosisjs/metamorphosis",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight JS framework for deploying Kakfa workers",
   "main": "lib",
   "types": "lib/",
@@ -27,7 +27,7 @@
   "bundleDependencies": [],
   "scripts": {
     "alex": "alex .",
-    "changelog": "github_changelog_generator && git add CHANGELOG.md && git commit -m \"Updating changelog\"",
+    "changelog": "docker run -it --rm -v \"$(pwd)\":/usr/local/src/your-app ferrarimarco/github-changelog-generator --user itcig --project metamorphosis && git add CHANGELOG.md && git commit -m \"Updating changelog\"",
     "build": "rimraf ./lib && tsc",
     "coverage": "nyc npm run test",
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'test/**/*.{js,ts,tsx}' --fix",
