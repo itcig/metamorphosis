@@ -4,6 +4,7 @@ declarations/
 docs/
 kafka-setup/
 test/
+src/
 .DS_Store
 .editorconfig
 .eslintignore
