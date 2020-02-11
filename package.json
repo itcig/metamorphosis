@@ -1,6 +1,6 @@
 {
-  "name": "metamorphosis",
-  "version": "0.0.1",
+  "name": "@metamorphosisjs/metamorphosis",
+  "version": "1.0.0",
   "description": "Lightweight JS framework for deploying Kakfa workers",
   "main": "lib",
   "types": "lib/",
@@ -57,7 +57,7 @@
     }
   },
   "files": [
-    "src"
+    "lib"
   ],
   "dependencies": {
     "config": "^3.2.5",
