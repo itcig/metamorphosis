@@ -59,6 +59,9 @@
   "files": [
     "lib"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "config": "^3.2.5",
     "debug": "^4.1.1",
