@@ -41,15 +41,15 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 	 *
 	 * @param query
 	 */
-	async query(query: string): Promise<any> {
-		debug('query', query);
+	async query(query: string, params: Array<any> | string = []): Promise<any> {
+		debug('query %s', mysqlClient.format(query, params));
 
 		if (!query) {
 			return;
 		}
 
 		try {
-			return this.connection.query(query);
+			return await this.connection.query(query, params);
 		} catch (err) {
 			console.error(err.message);
 		}
@@ -62,14 +62,14 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 	 * @param params
 	 */
 	async execute(query: string, params: Array<any> | string = []): Promise<any> {
-		debug('prepared query', query, params);
+		debug('prepared query %s', mysqlClient.format(query, params));
 
 		if (!query) {
 			return;
 		}
 
 		try {
-			return this.connection.execute(query, params);
+			return await this.connection.execute(query, params);
 		} catch (err) {
 			console.error(err.message);
 		}

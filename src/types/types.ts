@@ -280,7 +280,7 @@ export interface DatabaseSetup {
 
 export interface DatabaseClient {
 	connect(): Promise<this>;
-	query(query: string): Promise<any>;
+	query(query: string, params: Array<any> | string): Promise<any>;
 	execute(query: string, params: Array<any> | string): Promise<any>;
 	disconnect(): Promise<void>;
 }
