@@ -49,7 +49,7 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 		}
 
 		try {
-			return this.connection.query(query, params);
+			return await this.connection.query(query, params);
 		} catch (err) {
 			console.error(err.message);
 		}
@@ -69,7 +69,7 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 		}
 
 		try {
-			return this.connection.execute(query, params);
+			return await this.connection.execute(query, params);
 		} catch (err) {
 			console.error(err.message);
 		}
