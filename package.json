@@ -42,6 +42,9 @@
     "eslint-check": "eslint --print-config .eslintrc | eslint-config-prettier-check",
     "prettier": "prettier --write \"{src,test}/**/*.js\"",
     "prettier:docs": "prettier-markdown README.md docs/*",
+    "release": "release-it",
+    "release:dry-run": "release-it --dry-run",
+    "release:github-only": "release-it --no-npm.publish",
     "typedoc": "typedoc --out dist/docs src"
   },
   "lint-staged": {
@@ -98,6 +101,7 @@
     "prettier": "^1.19.1",
     "prettier-markdown": "^0.1.8",
     "progress": "^2.0.3",
+    "release-it": "^12.6.1",
     "rimraf": "^3.0.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
