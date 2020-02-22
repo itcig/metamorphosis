@@ -27,7 +27,8 @@
   "bundleDependencies": [],
   "scripts": {
     "alex": "alex .",
-    "changelog": "docker run -it --rm -v \"$(pwd)\":/usr/local/src/your-app ferrarimarco/github-changelog-generator --user itcig --project metamorphosis && git add CHANGELOG.md && git commit -m \"Updating changelog\"",
+    "changelog": "npx auto-changelog -p --commit-limit false --unreleased --template keepachangelog",
+    "changelog:commit": "npm run changelog && git add CHANGELOG.md && git commit -m \"chore(changelog): Updated changelog\"",
     "build": "rimraf ./lib && tsc",
     "coverage": "nyc npm run test",
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'test/**/*.{js,ts,tsx}' --fix",
@@ -43,6 +44,9 @@
     "prettier": "prettier --write \"{src,test}/**/*.js\"",
     "prettier:docs": "prettier-markdown README.md docs/*",
     "release": "release-it",
+    "release:patch": "release-it --ci patch",
+    "release:minor": "release-it --ci minor",
+    "release:major": "release-it --ci major",
     "release:dry-run": "release-it --dry-run",
     "release:github-only": "release-it --no-npm.publish",
     "typedoc": "typedoc --out dist/docs src"
@@ -85,6 +89,7 @@
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "alex": "^8.1.1",
+    "auto-changelog": "^1.16.2",
     "chai": "^4.2.0",
     "deepmerge": "^4.2.2",
     "eslint": "^6.8.0",

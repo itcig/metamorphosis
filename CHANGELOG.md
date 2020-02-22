@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.1.3](https://github.com/itcig/metamorphosis/tree/v0.1.3) (2020-02-21)
+
+[Full Changelog](https://github.com/itcig/metamorphosis/compare/v0.1.1...v0.1.3)
+
+**Merged pull requests:**
+
+-   Mysql adapter edits [\#6](https://github.com/itcig/metamorphosis/pull/6) ([unfrgivn](https://github.com/unfrgivn))
+
+## [v0.1.1](https://github.com/itcig/metamorphosis/tree/v0.1.1) (2020-02-11)
+
+[Full Changelog](https://github.com/itcig/metamorphosis/compare/v0.1.0...v0.1.1)
+
 ## [v0.1.0](https://github.com/itcig/metamorphosis/tree/v0.1.0) (2020-02-11)
 
 [Full Changelog](https://github.com/itcig/metamorphosis/compare/31dee2f73741b57ae7fd68624ddcd3eebc1de110...v0.1.0)
