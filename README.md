@@ -1,5 +1,7 @@
 # Metamorphosis
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/itcig/metamorphosis.svg)](https://greenkeeper.io/)
+
 A super dope, pluggable NodeJS Kafka Framework for building Kafka workers like consumers, producers and stream processors.
 
 ## Requirements
