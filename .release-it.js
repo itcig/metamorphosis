@@ -1,7 +1,7 @@
 module.exports = {
 	hooks: {
-		// Test that auto-changelog will run so options here are irrelevant
-		'before:release': 'npm run changelog',
+		// Update changelog and add to publish commit
+		'after:bump': 'npm run changelog',
 	},
 	git: {
 		changelog: 'npx auto-changelog -p --commit-limit false --stdout --unreleased --template tpl-release-changes.hbs',
@@ -11,5 +11,6 @@ module.exports = {
 	},
 	github: {
 		release: true,
+		releaseName: '${version}',
 	},
 };
