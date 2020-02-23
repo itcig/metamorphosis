@@ -1,10 +1,12 @@
 import Debug from 'debug';
-import fastify, { FastifyInstance, RouteOptions, HTTPMethod } from 'fastify';
+import fastify, { FastifyInstance, RouteOptions } from 'fastify';
 import * as http from 'http';
+import JSONbig from 'json-bigint';
 import { ApplicationServer } from '../server';
 import { ServerConfig, ServerInterface, ProducerService, GenericOptions } from '../../types/types';
 
 const debug = Debug('metamorphosis:server:http');
+const debugVerbose = Debug('metamorphosis:server:http:verbose');
 const debugError = Debug('metamorphosis:error:server:http');
 
 export class HttpServer extends ApplicationServer implements ServerInterface {
@@ -80,12 +82,10 @@ export class HttpServer extends ApplicationServer implements ServerInterface {
 	): this {
 		routeOptions.handler = async (request, reply): Promise<void> => {
 			try {
-				const recordMeta = await producer.send({
-					// value: Buffer.from(
-					// 	JSON.stringify(request.body),
-					// 	'utf8'
-					// ),
-					value: JSON.stringify(request.body),
+				debugVerbose(`Request received: %o`, JSONbig.stringify(request.body));
+
+				await producer.send({
+					value: Buffer.from(JSONbig.stringify(request.body), 'utf8'),
 				});
 
 				// Set content-type header if passed
@@ -93,13 +93,11 @@ export class HttpServer extends ApplicationServer implements ServerInterface {
 					reply.type(responseOptions.contentType);
 				}
 
-				debug(`Record produced`, JSON.stringify(recordMeta));
-
 				// TODO: What should be sent back? How should this be set in arguments?
 				// Send back a success reponse
 				reply.code(200).send(true);
 			} catch (err) {
-				debug(err);
+				debugError(err);
 				reply.send(500);
 			}
 		};

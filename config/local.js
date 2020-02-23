@@ -36,7 +36,7 @@ module.exports = {
 	// 	},
 	// },
 	server: {
-		log: 'SERVER_LOGGING',
+		logger: 'SERVER_LOGGING',
 		port: 'SERVER_PORT',
 		address: 'SERVER_HOST',
 		opts: {},

@@ -74,7 +74,7 @@ module.exports = {
 		},
 	},
 	server: {
-		log: false,
+		logger: false,
 		port: 3000,
 		address: '0.0.0.0',
 		opts: {},
