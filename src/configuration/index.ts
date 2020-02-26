@@ -2,14 +2,20 @@
 import { Application } from '../types/types';
 import Debug from 'debug';
 import path from 'path';
-import deepmerge from 'deepmerge';
 import config from 'config';
 import * as DotEnv from 'dotenv';
 import parseEnvValue from '../utils/parse-env-value';
 import { GenericOptions, InitFunction } from '../types/types';
 
 // Load config from dotenv
-DotEnv.config();
+const envConfig = DotEnv.config();
+
+// Override any ENV values already set on the server
+if (`parsed` in envConfig) {
+	for (const k in envConfig.parsed) {
+		process.env[k] = envConfig.parsed[k];
+	}
+}
 
 // Enable debug module for string loaded in .env
 Debug.enable(process.env.DEBUG || '');
