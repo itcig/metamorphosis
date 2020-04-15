@@ -3,10 +3,11 @@ import fastify, { HTTPMethod, RequestHandler } from 'fastify';
 import { KafkaConfig, ConsumerConfig, EachBatchPayload, ProducerConfig, Message, Kafka, RecordMetadata } from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
-import * as http from 'http';
-import { Http2Stream } from 'http2';
 import { ApplicationServer } from '../server/server';
 import { DatabaseBaseClient } from '../database-adapters/adapter';
+
+// Make kafkajs types available
+export * from 'kafkajs';
 
 // export interface KafkaApp {
 // 	/**
