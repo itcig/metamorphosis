@@ -27,7 +27,7 @@
   "bundleDependencies": [],
   "scripts": {
     "alex": "alex .",
-    "changelog": "npx auto-changelog --commit-limit false --unreleased --template keepachangelog",
+    "changelog": "npx auto-changelog -p --commit-limit false --unreleased --template keepachangelog",
     "changelog:commit": "npm run changelog && git add CHANGELOG.md && git commit -m \"chore(changelog): Updated changelog\"",
     "build": "rimraf ./lib && tsc",
     "coverage": "nyc npm run test",
