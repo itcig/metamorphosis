@@ -5,7 +5,7 @@ import { get, set } from 'lodash';
 // import events from './events';
 // import hooks from './hooks';
 
-import { Application, ApplicationSettings, ServiceMethods, ServiceTypes, SetupMethod } from '../types/types';
+import { Application, ApplicationSettings, ServiceMethods, ServiceTypes, SetupMethod, DatabaseClient } from '../types/types';
 import { ApplicationServer } from '../server/server';
 
 const debug = Debug('metamorphosis:app');
@@ -147,12 +147,14 @@ export default class App implements Application {
 	async kill(): Promise<void> {
 		try {
 			// Kill database connections
-			Debug('metamorphosis:app:verbose')(`Kill DB`, !!this.get('database'));
-			this.get('database') && this.get('database').disconnect();
+			const objDb: DatabaseClient = this.get('database');
+			Debug('metamorphosis:app:verbose')(`Kill DB`, !!objDb);
+			objDb && objDb.disconnect();
 
 			// Kill running server
-			Debug('metamorphosis:app:verbose')(`Kill Server`, !!this.get('server'));
-			this.get('server') && this.get('server').stop();
+			const objServer: ApplicationServer = this.get('server');
+			Debug('metamorphosis:app:verbose')(`Kill Server`, !!objServer);
+			objServer && objServer.stop();
 
 			// Kill running service connections
 			for (const serviceName of Object.keys(this.services)) {
