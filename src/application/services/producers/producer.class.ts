@@ -109,10 +109,12 @@ export class ProducerService extends Service {
 			compression: this.options.compression || CompressionTypes.None,
 		};
 
+		const numTotalMessages = topicMessages.reduce((total, item) => item.messages && total + item.messages.length, 0);
+
 		try {
 			const response = await this.getProducer().sendBatch(producerBatch);
 
-			debug(`Done producing batch messages to ${topicMessages.length} topics`);
+			debug(`Done producing ${numTotalMessages} batch messages to ${topicMessages.length} topics`);
 
 			return response;
 		} catch (err) {
