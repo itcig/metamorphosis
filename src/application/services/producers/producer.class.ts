@@ -29,7 +29,7 @@ export class ProducerService extends Service {
 			kafkaSettings: { producer: producerConfig },
 		} = options || { producer: {} };
 
-		debug(`Creating producer ${options.id} `, producerConfig);
+		debug(`Creating producer (${options.id}) `, producerConfig);
 
 		// Initialize producer
 		this.producer = this.getClient().producer(producerConfig);
@@ -39,6 +39,7 @@ export class ProducerService extends Service {
 	 * Disconnect from both produce
 	 */
 	async stop(): Promise<void> {
+		debug(`Disconnecting producer`);
 		await this.producer.disconnect();
 	}
 
@@ -59,7 +60,7 @@ export class ProducerService extends Service {
 	 */
 	async sendMessages(messages: Message[], overrideTopic?: string): Promise<RecordMetadata[]> {
 		const topic = overrideTopic || this.getTopic();
-		debug(`Producing to topic (${topic})`, messages);
+		// debug(`Producing to topic (${topic})`, messages);
 
 		const producerRecord: ProducerRecord = {
 			topic,
@@ -72,11 +73,12 @@ export class ProducerService extends Service {
 		try {
 			const response = await this.getProducer().send(producerRecord);
 
-			debug('Done producing');
+			debug(`Done producing ${messages.length} messages`);
 
 			return response;
 		} catch (err) {
 			debugError(`Error producing message: %o`, err);
+
 			throw err;
 		}
 	}
@@ -97,11 +99,12 @@ export class ProducerService extends Service {
 		try {
 			const response = await this.getProducer().sendBatch(producerBatch);
 
-			debug('Done producing');
+			debug(`Done producing batch messages to ${topicMessages.length} topics`);
 
 			return response;
 		} catch (err) {
 			debugError(`Error producing message: %o`, err);
+
 			throw err;
 		}
 	}

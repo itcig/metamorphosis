@@ -42,23 +42,33 @@ export class ConsumerService extends Service {
 	 * Connect to consumer with configured topic
 	 */
 	async start(): Promise<any> {
+		debug(`Starting consumer`);
 		const topic = this.getTopic();
 
-		await this.getConsumer().connect();
-		await this.getConsumer().subscribe({
-			topic,
-			fromBeginning: !!this.options.fromBeginning,
-		});
+		try {
+			await this.getConsumer().connect();
+			await this.getConsumer().subscribe({
+				topic,
+				fromBeginning: !!this.options.fromBeginning,
+			});
 
-		Debug('metamorphosis:runtime')(
-			`${String.fromCodePoint(0x1f6a6)} Subscribing to topic ${this.getTopic()} with group ${this.getGroupId()}`
-		);
+			Debug('metamorphosis:runtime')(
+				`${String.fromCodePoint(0x1f6a6)} Subscribing to topic ${this.getTopic()} with group ${this.getGroupId()}`
+			);
+		} catch (err) {
+			Debug('metamorphosis:error')(
+				`${String.fromCodePoint(0x1f6a7)} Failed subsscribing to topic ${this.getTopic()} with message: ${err.message}}`
+			);
+
+			throw err;
+		}
 	}
 
 	/**
 	 * Disconnect from both producer and consumer
 	 */
 	async stop(): Promise<void> {
+		debug(`Consumer ${this.getGroupId()} (${this.getTopic()}) disconnected`);
 		await this.consumer.disconnect();
 	}
 
