@@ -1,5 +1,8 @@
+import Debug from 'debug';
 import { ConsumerService } from '../consumer.class';
 import { Application, DefaultConsumerServiceOptions } from '../../../../types/types';
+
+const debug = Debug('metamorphosis:app:consumer:default');
 
 export class DefaultConsumerService extends ConsumerService {
 	/** Service options for this consumer */
@@ -53,6 +56,7 @@ export class DefaultConsumerService extends ConsumerService {
 			eachBatch:
 				this.getBatchHandler() ||
 				(async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
+					debug(`Consuming batch of ${batch.messages.length} messages`);
 					for (const message of batch.messages) {
 						if (!isRunning() || isStale()) break;
 
