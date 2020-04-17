@@ -168,6 +168,7 @@ export declare class DefaultService<T = any> extends Service<T> implements Servi
 export interface ProducerServiceOptions extends ServiceOptions {
 	topic: string;
 	multiTopic?: string[];
+	compression?: number;
 }
 
 export declare class ProducerService<T = any> extends Service<T> implements ServiceMethods<T> {

@@ -75,6 +75,7 @@
     "fastify": "^2.11.0",
     "json-bigint": "^0.3.0",
     "kafkajs": "^1.11.0",
+    "kafkajs-snappy": "^1.1.0",
     "lodash": "^4.17.15",
     "mysql2": "^2.1.0",
     "winston": "^3.2.1"

@@ -1,5 +1,15 @@
 import Debug from 'debug';
-import { CompressionTypes, Message, Producer, ProducerRecord, RecordMetadata, ProducerBatch, TopicMessages } from 'kafkajs';
+import {
+	CompressionCodecs,
+	CompressionTypes,
+	Message,
+	Producer,
+	ProducerRecord,
+	RecordMetadata,
+	ProducerBatch,
+	TopicMessages,
+} from 'kafkajs';
+import SnappyCodec from 'kafkajs-snappy';
 import { Service } from '../service.class';
 import { Application, ProducerServiceOptions } from '../../../types/types';
 
@@ -33,6 +43,9 @@ export class ProducerService extends Service {
 
 		// Initialize producer
 		this.producer = this.getClient().producer(producerConfig);
+
+		// Add support for Snappy compression
+		CompressionCodecs[CompressionTypes.Snappy] = SnappyCodec;
 	}
 
 	/**
@@ -67,7 +80,7 @@ export class ProducerService extends Service {
 			messages,
 			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
 			timeout: this.options.timeout || 30000,
-			compression: CompressionTypes.None,
+			compression: this.options.compression || CompressionTypes.None,
 		};
 
 		try {
@@ -93,7 +106,7 @@ export class ProducerService extends Service {
 			topicMessages,
 			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
 			timeout: this.options.timeout || 30000,
-			compression: CompressionTypes.None,
+			compression: this.options.compression || CompressionTypes.None,
 		};
 
 		try {
