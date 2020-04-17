@@ -46,7 +46,7 @@ export class ProducerService extends Service {
 	 * Send messages to producer topic. Messages are always sent as an array so this wrapper
 	 * is just a shortcut for sending an individual message
 	 */
-	async send(message: Message, overrideTopic?: string): Promise<RecordMetadata[]> {
+	async send(message: Message, overrideTopic?: string): Promise<RecordMetadata[] | void> {
 		// Build message array to send to kafkajs
 		const messages = [message];
 
@@ -57,7 +57,7 @@ export class ProducerService extends Service {
 	/**
 	 * Send messages to producer topic
 	 */
-	async sendMessages(messages: Message[], overrideTopic?: string): Promise<RecordMetadata[]> {
+	async sendMessages(messages: Message[], overrideTopic?: string): Promise<RecordMetadata[] | void> {
 		const topic = overrideTopic || this.getTopic();
 		debug(`Producing to topic (${topic})`, messages);
 
@@ -72,12 +72,11 @@ export class ProducerService extends Service {
 		try {
 			const response = await this.getProducer().send(producerRecord);
 
-			debug('Done producing');
+			debug(`Done producing ${messages.length} messages`);
 
 			return response;
 		} catch (err) {
 			debugError(`Error producing message: %o`, err);
-			throw err;
 		}
 	}
 
@@ -86,7 +85,7 @@ export class ProducerService extends Service {
 	 *
 	 * @param topicMessages Array of TopicMessages which contain a `topic` key and `messages` key as the same array of messages that would be passed to `sendMessages()`
 	 */
-	async sendBatch(topicMessages: TopicMessages[]): Promise<RecordMetadata[]> {
+	async sendBatch(topicMessages: TopicMessages[]): Promise<RecordMetadata[] | void> {
 		const producerBatch: ProducerBatch = {
 			topicMessages,
 			acks: this.options.acks || -1, // Default is -1 "all leaders must acknowledge"
@@ -97,12 +96,11 @@ export class ProducerService extends Service {
 		try {
 			const response = await this.getProducer().sendBatch(producerBatch);
 
-			debug('Done producing');
+			debug(`Done producing batch messages to ${topicMessages.length} topics`);
 
 			return response;
 		} catch (err) {
 			debugError(`Error producing message: %o`, err);
-			throw err;
 		}
 	}
 
