@@ -1,15 +1,5 @@
 import Debug from 'debug';
-import {
-	CompressionCodecs,
-	CompressionTypes,
-	Message,
-	Producer,
-	ProducerRecord,
-	RecordMetadata,
-	ProducerBatch,
-	TopicMessages,
-} from 'kafkajs';
-import SnappyCodec from 'kafkajs-snappy';
+import { CompressionTypes, Message, Producer, ProducerRecord, RecordMetadata, ProducerBatch, TopicMessages } from 'kafkajs';
 import { Service } from '../service.class';
 import { Application, ProducerServiceOptions } from '../../../types/types';
 
@@ -43,9 +33,6 @@ export class ProducerService extends Service {
 
 		// Initialize producer
 		this.producer = this.getClient().producer(producerConfig);
-
-		// Add support for Snappy compression
-		CompressionCodecs[CompressionTypes.Snappy] = SnappyCodec;
 	}
 
 	/**
