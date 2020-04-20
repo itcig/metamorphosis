@@ -24,13 +24,13 @@ Copy example `.env` and replace values with your own
 cp .env.example .env
 ```
 
-| Option               | Description                                                                  | Default                      |
-| -------------------- | ---------------------------------------------------------------------------- | ---------------------------- |
-| KAFKA_BROKERS        | Comma-delimited string of brokers e.g. `10.10.10.1:9092,10.10.10.2:9092,...` | localhost:9092               |
-| KAFKA_CLIENT_ID      | Unique ID used by consumers and producers in this app                        | metamorphosis                |
-| KAFKA_TOPIC_CONSUMER | Topic to read from for a single-topic consumer app                           | metamorphosis.test           |
-| KAFKA_TOPIC_PRODUCER | Topic to write to for a single-topic producer app                            | metamorphosis.test           |
-| CONSUMER_GROUP_ID    | Group name responsible for tracking offsets on a consumer                    | metamorphosis-consumer-group |
+| Option               | Description                                                                                              | Default                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| KAFKA_BROKERS        | Comma-delimited string of brokers e.g. `10.10.10.1:9092,10.10.10.2:9092,...`                             | localhost:9092               |
+| KAFKA_CLIENT_ID      | Unique ID used by consumers and producers in this app                                                    | metamorphosis                |
+| KAFKA_TOPIC_CONSUMER | Topic to read from for a single-topic consumer app                                                       | metamorphosis.test           |
+| KAFKA_TOPIC_PRODUCER | Topic to write to for a single-topic producer app                                                        | metamorphosis.test           |
+| CONSUMER_GROUP_ID    | Group name responsible for tracking offsets on a consumer. This should be unique for every consumer app. | metamorphosis-consumer-group |
 
 # Usage
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Debug from 'debug';
-import { Kafka } from 'kafkajs';
+import { CompressionCodecs, CompressionTypes, Kafka } from 'kafkajs';
+import SnappyCodec from 'kafkajs-snappy';
 import { get } from 'lodash';
 import deepmerge from 'deepmerge';
 import { Application, Id, ServiceMethods, ServiceOptions, ServiceTypes } from '../../types/types';
@@ -35,6 +36,9 @@ export class Service<T = any> implements ServiceMethods<T> {
 				const brokerString: string = brokers!.toString();
 				config.brokers = brokerString.split(',');
 			}
+
+			// Add support for Snappy compression
+			CompressionCodecs[CompressionTypes.Snappy] = SnappyCodec;
 
 			debug(`Setting Kafka client`, config);
 

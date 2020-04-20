@@ -2,7 +2,7 @@ import Debug from 'debug';
 import { DatabaseMysqlPoolClient } from './mysql-pool.class';
 import { Application, GenericOptions, InitFunction, DatabaseConfig } from '../../types/types';
 
-const debugErrors = Debug('metamorphosis.errors');
+const debugError = Debug('metamorphosis:error');
 
 export default function init(opts?: GenericOptions): InitFunction {
 	return (app?: Application): void => {
@@ -10,28 +10,30 @@ export default function init(opts?: GenericOptions): InitFunction {
 		if (!app) {
 			return;
 		}
-		const databaseConfig = app.get('config.database');
+		const configDb = app.get('config.database');
 
 		const {
+			options: configOptions,
 			mysql: { config: mysqlPoolConfig },
-		} = databaseConfig || { mysql: { config: {} } };
+		} = configDb || { mysql: { config: {} } };
 
 		// Ensure the minimum values are set to create MySQL Pool
 		const hasRequriedProps = ['database', 'password', 'user'].reduce((i, j) => i && j in mysqlPoolConfig, true);
 
 		if (!hasRequriedProps) {
-			debugErrors(`Missing required properties to create Mysql connection`, mysqlPoolConfig);
+			debugError(`Missing required properties to create Mysql connection`, mysqlPoolConfig);
 			return;
 		}
 
-		const options: DatabaseConfig = {
+		const databaseConfig: DatabaseConfig = {
 			config: mysqlPoolConfig,
 			...opts,
+			options: configOptions,
 		};
 
 		// Initialize our service with any options it requires
 		// TODO: use mixin to add database method to app object and possibly move this to main index for this plugin
 		// so user would init the generic database adapater index.ts and specify which adapater(s)
-		app.set('database', new DatabaseMysqlPoolClient(options));
+		app.set('database', new DatabaseMysqlPoolClient(databaseConfig));
 	};
 }
