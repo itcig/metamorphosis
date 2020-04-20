@@ -47,6 +47,8 @@ export type NullableId = Id | null;
 
 export type GenericOptions = { [key: string]: any };
 
+export type GenericObject = { [key: string]: any };
+
 export interface ServiceMethods<T> {
 	[key: string]: any;
 
@@ -272,6 +274,7 @@ export interface ServerHttpRoute {
 export interface DatabaseConfig {
 	connectionString?: string;
 	config?: PoolConnection;
+	options?: GenericOptions;
 }
 
 export interface DatabaseSetup {
@@ -377,3 +380,5 @@ export interface Connection extends EventEmitter {
 export interface PoolConnection extends Connection {
 	release(): void;
 }
+
+export type SqlInsertValues = { [key: string]: any }[];
