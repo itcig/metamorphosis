@@ -101,9 +101,8 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					}
 
 					// Get table name from message or config
-					const {
-						table: { name: configTableName, topicPrefix: configTableTopicPrefix },
-					} = this.sinkMysqlConsumerOptions;
+					const { table: configTable } = this.sinkMysqlConsumerOptions || {};
+					const { name: configTableName, topicPrefix: configTableTopicPrefix } = configTable || {};
 
 					// Order of precedence is table specified in message, explicitly in app config, or as a pattern suffix to all consumed topics
 					const dbTable =
