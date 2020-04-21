@@ -46,6 +46,25 @@ module.exports = {
 			maxBytes: 10485760,
 			// The maximum amount of time in milliseconds the server will block before answering the fetch request if there isn’t sufficient data to immediately satisfy the requirement given by minBytes
 			maxWaitTimeInMs: 5000,
+			// Sink consumer config
+			sink: {
+				insert: {
+					mode: 'insert', // insert|insertignore|upsert|update
+				},
+				table: {
+					name: '', // If set, all records will be written to this table regardless of data in key or value.
+					topicPrefix: '', // If set, will assume table name whatever follows the prefix in the consumed topic name. So topic `stream.event.production.orders` will write to the `orders` table.
+				},
+				// TODO: Finish these settings
+				// pk: {
+				// 	mode: '', // Empty for none, `record_value`, `record_key`
+				// 	fields: '', // List of comma-separated primary key field names
+				// },
+				fields: {
+					whitelist: '', // List of comma-separated record value field names. If empty, all fields from the record value are utilized, otherwise used to filter to the desired fields.
+					fromUnixtime: '', // List of comma-separated field names to convert from unix timestamps to MySQL dates.
+				},
+			},
 		},
 		producer: {
 			// Default producer topic
