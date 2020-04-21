@@ -213,6 +213,8 @@ export declare class ConsumerService<T = any> extends Service<T> implements Serv
 
 export type DefaultConsumerServiceOptions = ConsumerServiceOptions;
 
+export type SinkMysqlConsumerServiceOptions = ConsumerServiceOptions;
+
 export declare class DefaultConsumerService<T = any> extends ConsumerService<T> implements InternalServiceMethods<T> {
 	options: DefaultConsumerServiceOptions;
 

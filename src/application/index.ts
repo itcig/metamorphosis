@@ -3,7 +3,7 @@ import { Application } from '../types/types';
 
 // Export barrel objects as well as individual service so we can import all or specific services in our application
 export { default as services } from './services';
-export { default as consumers, consumer } from './services/consumers';
+export { default as consumers, consumer, sinkMysqlConsumer } from './services/consumers';
 export { default as producers, producer } from './services/producers';
 
 // interface Metamophosis {

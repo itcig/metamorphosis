@@ -28,18 +28,13 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 
 			// Set timezone for client if passed to allow for proper TIMESTAMP data
 			const timeZone = this.getTimezone();
-			let tzOffset;
-			if (timeZone) {
-				tzOffset = moment()
-					.tz(this.getTimezone())
-					.format('Z');
+			const tzOffset = timeZone
+				? moment()
+						.tz(this.getTimezone())
+						.format('Z')
+				: moment().format('Z');
 
-				debug(`Setting timezone to ${timeZone} (${tzOffset})`);
-			} else {
-				tzOffset = moment().format('Z');
-
-				debug(`Setting timezone to server default (${tzOffset})`);
-			}
+			debug(`Setting timezone to ${timeZone || 'server default'} (${tzOffset})`);
 
 			// Set time_zone for session
 			await this.connection.query('SET SESSION time_zone=?;', [tzOffset]);
