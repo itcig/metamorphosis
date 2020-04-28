@@ -1,5 +1,5 @@
 import Debug from 'debug';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { ConsumerService } from '../consumer.class';
 import { parseValueAsArray } from '../../../../utils';
 import { Application, GenericObject, SinkMysqlConsumerServiceOptions } from '../../../../types/types';
@@ -142,7 +142,18 @@ export class SinkMysqlConsumerService extends ConsumerService {
 							// Convert unix timestamps into MySql dates for specified fields.
 							// This will convert to the local timezone which will be set on the MySQL insert
 							if (!!convertEpochFields && convertEpochFields.includes(key)) {
-								fieldValue = moment.unix(fieldValue).format('YYYY-MM-DD HH:mm:ss');
+								let oDate = moment.unix(fieldValue);
+
+								// Set timezone for client if passed to allow for proper TIMESTAMP data
+								const timeZone = this.database.getTimezone();
+
+								// Set timezone if configured
+								if (timeZone) {
+									oDate = oDate.tz(timeZone);
+								}
+
+								// Convert value to MySql datetime string
+								fieldValue = oDate.format('YYYY-MM-DD HH:mm:ss');
 							}
 
 							// Add value to final object
