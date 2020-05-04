@@ -63,8 +63,8 @@ export class SinkMysqlConsumerService extends ConsumerService {
 		 *	}
 		 */
 		await this.getConsumer().run({
-			// Allow batch to fail in the middle without committing all offsets
-			eachBatchAutoResolve: false,
+			// Since we perform all database inserts for the entire batch, we do only want to commit batch offsets at the end of the batch
+			eachBatchAutoResolve: true,
 			eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
 				debug(`Consuming batch of ${batch.messages.length} messages`);
 
@@ -96,7 +96,6 @@ export class SinkMysqlConsumerService extends ConsumerService {
 
 					// Skip empty records
 					if (!values) {
-						resolveOffset(message.offset);
 						continue;
 					}
 
@@ -111,8 +110,6 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					// Skip if no table can be derived
 					if (!dbTable) {
 						debugError('No table specificed for message:', messageValue);
-
-						resolveOffset(message.offset);
 						continue;
 					}
 
@@ -172,14 +169,11 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					} else {
 						batchInsertValues[tableIndex].values = [...batchInsertValues[tableIndex].values, rowData];
 					}
-
-					resolveOffset(message.offset);
-					await heartbeat();
 				}
 
-				// TODO: What if the batch fails mid-loop? Are the resolved offsets committed? If so the producer would not finish so ignore marking those as read
-
 				// Run SQL inserts for every group of table + values
+				// If the batch fails mid-loop, an exception will be thrown and none of the messages will be committed
+				// TODO: Need to solve committing a partial batch if the first in a set of batchInsertValues successfully writes but future iterations fail
 				for (const tableInserts of batchInsertValues) {
 					const { table, values } = tableInserts;
 
@@ -190,6 +184,8 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					});
 
 					debugVerbose('Result: ', result);
+
+					// TODO: On error re-insert failed messages to end of topic and allow the rest of the batch to finish??
 				}
 			},
 		});
