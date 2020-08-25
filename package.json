@@ -69,6 +69,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@kafkajs/confluent-schema-registry": "^1.0.6",
     "config": "^3.2.5",
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
