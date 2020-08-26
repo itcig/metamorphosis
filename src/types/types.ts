@@ -5,6 +5,8 @@ import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket
 import { EventEmitter } from 'events';
 import { ApplicationServer } from '../server/server';
 import { DatabaseBaseClient } from '../database-adapters/adapter';
+import { SchemaRegistryAPIClientArgs, SchemaRegistryAPIClientOptions } from '@kafkajs/confluent-schema-registry/dist/api';
+import { isInteger } from 'lodash';
 
 // Make kafkajs types available
 export * from 'kafkajs';
@@ -248,10 +250,14 @@ export declare class MysqlConsumerService<T = any> extends ConsumerService<T> im
 // 	databaseClient?: string;
 // }
 
+export interface RegistryConfig extends SchemaRegistryAPIClientArgs {}
+export interface RegistryOptions extends SchemaRegistryAPIClientOptions {}
+
 export interface ApplicationKafkaSettings {
 	config: KafkaConfig;
 	consumer: ConsumerConfig;
 	producer: ProducerConfig;
+	registry?: RegistryConfig;
 }
 
 export interface ServerConfig {
