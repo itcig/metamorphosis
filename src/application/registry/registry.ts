@@ -1,12 +1,12 @@
 import { SchemaRegistry } from '@kafkajs/confluent-schema-registry';
 import avro from 'avsc';
 import deepmerge from 'deepmerge';
+import { RegistryConfig, RegistryOptions } from '../../types/types';
 
 import longType from './types/long-type';
-import { SchemaRegistryAPIClientArgs, SchemaRegistryAPIClientOptions } from '@kafkajs/confluent-schema-registry/dist/api';
 
 export class KafkaSchemaRegistry extends SchemaRegistry {
-	constructor(schemaRegistryClient: SchemaRegistryAPIClientArgs, options?: SchemaRegistryAPIClientOptions | undefined) {
+	constructor(schemaRegistryClient: RegistryConfig, options?: RegistryOptions | undefined) {
 		// // Merge any passed forSchemaOptions with custom registry for long Type.
 		// // Without specifying long Type then any BigInts from a database would be truncated and throw a precision error
 		// // https://github.com/kafkajs/confluent-schema-registry/issues/53

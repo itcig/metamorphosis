@@ -2,9 +2,10 @@
 import Debug from 'debug';
 import { CompressionCodecs, CompressionTypes, Kafka } from 'kafkajs';
 import SnappyCodec from 'kafkajs-snappy';
+import KafkaSchemaRegistry from '../registry';
 import { get } from 'lodash';
 import deepmerge from 'deepmerge';
-import { Application, Id, ServiceMethods, ServiceOptions, ServiceTypes } from '../../types/types';
+import { Application, Id, ServiceMethods, ServiceOptions } from '../../types/types';
 
 const debug = Debug('metamorphosis:app:service');
 
@@ -12,6 +13,8 @@ export class Service<T = any> implements ServiceMethods<T> {
 	options: ServiceOptions;
 
 	client: Kafka;
+
+	registry?: KafkaSchemaRegistry;
 
 	/**
 	 * Service constructor
@@ -26,9 +29,8 @@ export class Service<T = any> implements ServiceMethods<T> {
 		const appClient = app.get('client');
 
 		if (!appClient) {
-			// console.log('opts', options);
 			const { kafkaSettings } = options;
-			const { config } = kafkaSettings || {};
+			const { config, registry } = kafkaSettings || {};
 			const { brokers } = config || {};
 
 			// Ensure brokers list is an array
@@ -47,6 +49,16 @@ export class Service<T = any> implements ServiceMethods<T> {
 
 			// Set client for later use
 			app.set('client', this.client);
+
+			// Load schema registry if URI is set
+			if (registry) {
+				this.registry = new KafkaSchemaRegistry(registry);
+
+				// Set registry for later use
+				app.set('registry', this.registry);
+
+				debug(`Setting Kafka schema registry`, registry.host);
+			}
 		} else {
 			// Use existing client attached to app to avoid duplicating connections
 			this.client = appClient;
