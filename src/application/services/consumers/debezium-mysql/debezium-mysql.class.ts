@@ -10,9 +10,6 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 	/** Service options for this consumer */
 	debeziumMysqlConsumerOptions: DebeziumMysqlConsumerServiceOptions;
 
-	/** MySql client */
-	database;
-
 	/** Schema Registry client */
 	registry?: KafkaSchemaRegistry;
 
@@ -28,8 +25,6 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 
 		this.debeziumMysqlConsumerOptions = options;
 
-		this.database = app.get('database');
-
 		this.registry = app.get('registry');
 	}
 
@@ -42,9 +37,6 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 		if (!this.options.recordHandler) {
 			return;
 		}
-
-		// Connect to  MySql
-		await this.database.connect();
 
 		// Run initial consumer connect and subscribe
 		await super.start();
@@ -109,7 +101,7 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 							}, {});
 
 						// Run record handler callback
-						await this.options.recordHandler(this.database, name, source, op, before, after, changeData, tsMs);
+						await this.options.recordHandler(name, source, op, before, after, changeData, tsMs);
 
 						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Resolving offset: %s', message.offset);
 

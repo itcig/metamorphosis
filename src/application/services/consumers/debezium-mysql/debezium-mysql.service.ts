@@ -1,6 +1,5 @@
 // Initializes the `defaultConsumer` service
 import { DebeziumMysqlConsumerService } from './debezium-mysql.class';
-import { mysqlPoolDatabaseAdapater } from '../../../../database-adapters';
 import { Application, ConsumerTypes, DebeziumMysqlConsumerServiceOptions } from '../../../../types/types';
 
 // import hooks from './default.hooks';
@@ -29,9 +28,6 @@ export default function(app: Application): void {
 		fromBeginning: fromBeginning,
 		recordHandler,
 	};
-
-	// Set up MySql Pool adapater which will handdle the setup and validation of its own config
-	app.configure(mysqlPoolDatabaseAdapater());
 
 	// Initialize our service with any options it requires
 	app.use('debeziumMysqlConsumer', new DebeziumMysqlConsumerService(options, app));
