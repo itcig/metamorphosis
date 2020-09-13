@@ -4,7 +4,6 @@ import Differify from '@netilon/differify';
 import { Application, DebeziumMysqlConsumerServiceOptions } from '../../../../types/types';
 import KafkaSchemaRegistry from '../../../registry';
 
-const debug = Debug('metamorphosis:app:consumer:debezium-mysql');
 const debugError = Debug('metamorphosis:error');
 
 export class DebeziumMysqlConsumerService extends ConsumerService {
@@ -72,8 +71,10 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 		 *	}
 		 */
 		await this.getConsumer().run({
+			autoCommitInterval: 5000,
+			autoCommitThreshold: 100,
 			eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
-				debug(`Consuming batch of ${batch.messages.length} messages`);
+				Debug('metamorphosis:app:consumer:debezium-mysql:debug')(`Consuming batch of ${batch.messages.length} messages`);
 
 				for (const message of batch.messages) {
 					if (!isRunning() || isStale()) break;
@@ -109,6 +110,8 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 
 						// Run record handler callback
 						await this.options.recordHandler(this.database, name, source, op, before, after, changeData, tsMs);
+
+						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Resolving offset: %s', message.offset);
 
 						resolveOffset(message.offset);
 						await heartbeat();
