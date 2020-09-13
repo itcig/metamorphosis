@@ -7,6 +7,7 @@ import { ApplicationServer } from '../server/server';
 import { DatabaseBaseClient } from '../database-adapters/adapter';
 import { SchemaRegistryAPIClientArgs, SchemaRegistryAPIClientOptions } from '@kafkajs/confluent-schema-registry/dist/api';
 import { isInteger } from 'lodash';
+import { DatabaseMysqlPoolClient } from '../database-adapters/mysql-pool/mysql-pool.class';
 
 // Make kafkajs types available
 export * from 'kafkajs';
@@ -217,6 +218,21 @@ export type DefaultConsumerServiceOptions = ConsumerServiceOptions;
 
 export type SinkMysqlConsumerServiceOptions = ConsumerServiceOptions;
 
+export type DebeziumMysqlConsumerRecordHandler = (
+	mysql: DatabaseMysqlPoolClient,
+	name: string,
+	source: GenericObject,
+	op: string,
+	changeData?: GenericObject,
+	before?: GenericObject,
+	after?: GenericObject,
+	tsMs?: number
+) => Promise<void>;
+
+export interface DebeziumMysqlConsumerServiceOptions extends ConsumerServiceOptions {
+	recordHandler: DebeziumMysqlConsumerRecordHandler;
+}
+
 export declare class DefaultConsumerService<T = any> extends ConsumerService<T> implements InternalServiceMethods<T> {
 	options: DefaultConsumerServiceOptions;
 
@@ -237,6 +253,8 @@ export declare class MysqlConsumerService<T = any> extends ConsumerService<T> im
 	constructor(options?: MysqlConsumerServiceOptions);
 	start(): Promise<void>;
 }
+
+export type MysqlClient = DatabaseMysqlPoolClient;
 
 // export interface Configuration {
 // 	[key: string]: any;
