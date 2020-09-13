@@ -219,7 +219,6 @@ export type DefaultConsumerServiceOptions = ConsumerServiceOptions;
 export type SinkMysqlConsumerServiceOptions = ConsumerServiceOptions;
 
 export type DebeziumMysqlConsumerRecordHandler = (
-	mysql: DatabaseMysqlPoolClient,
 	name: string,
 	source: GenericObject,
 	op: string,
