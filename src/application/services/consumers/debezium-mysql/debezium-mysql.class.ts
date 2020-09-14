@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import { ConsumerService } from '../consumer.class';
 import Differify from '@netilon/differify';
-import { Application, DebeziumMysqlConsumerServiceOptions } from '../../../../types/types';
+import { Application, DebeziumMysqlConsumerServiceOptions, GenericObject } from '../../../../types/types';
 import KafkaSchemaRegistry from '../../../registry';
 
 const debugError = Debug('metamorphosis:error');
@@ -65,23 +65,41 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 		await this.getConsumer().run({
 			autoCommitInterval: 5000,
 			autoCommitThreshold: 100,
-			eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
+			eachBatch: async ({ batch, resolveOffset, commitOffsetsIfNecessary, heartbeat, isRunning, isStale }): Promise<void> => {
 				Debug('metamorphosis:app:consumer:debezium-mysql:debug')(`Consuming batch of ${batch.messages.length} messages`);
+
+				Debug('metamorphosis:app:consumer:debezium-mysql:debug')('Consuming batch: %O', {
+					topic: batch.topic,
+					partition: batch.partition,
+					highWatermark: batch.highWatermark,
+					messages: batch.messages.length,
+				});
 
 				for (const message of batch.messages) {
 					if (!isRunning() || isStale()) break;
 
 					try {
+						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Message: %O', message);
+
 						// Extract message value from Kafka message
 						const { value: messageValue } = message || {};
 
 						// Skip if no message `value`
 						if (!messageValue) {
+							resolveOffset(message.offset);
 							continue;
 						}
 
+						let parsedValue: GenericObject;
+
 						// Kafka message value should be Avro encoded so decode, otherwise try to read as JSON-encoded Buffer
-						const parsedValue = this.registry ? await this.registry.decode(messageValue) : JSON.parse(messageValue.toString());
+						// If unable to decode then skip as something is bunk with the message and it will never get past this offset
+						try {
+							parsedValue = this.registry ? await this.registry.decode(messageValue) : JSON.parse(messageValue.toString());
+						} catch (err) {
+							resolveOffset(message.offset);
+							continue;
+						}
 
 						// eslint-disable-next-line @typescript-eslint/camelcase
 						const { name, before, after, source, op, ts_ms: tsMs } = parsedValue || {};
@@ -103,12 +121,16 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 						// Run record handler callback
 						await this.options.recordHandler(name, source, op, before, after, changeData, tsMs);
 
-						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Resolving offset: %s', message.offset);
+						Debug('metamorphosis:app:consumer:debezium-mysql:debug')('Resolving offset: %s', message.offset);
 
 						resolveOffset(message.offset);
+
+						// Commit any resolved offsets using autoCommit thresholds
+						await commitOffsetsIfNecessary();
+
 						await heartbeat();
 					} catch (err) {
-						debugError(`Unable to parse message: %s %o`, err.message, err);
+						debugError(`Unable to resolve message: %s %o`, err.message, err);
 						throw err;
 					}
 				}
