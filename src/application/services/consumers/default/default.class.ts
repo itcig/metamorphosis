@@ -53,9 +53,11 @@ export class DefaultConsumerService extends ConsumerService {
 		await this.getConsumer().run({
 			// Allow batch to fail in the middle without committing all offsets
 			eachBatchAutoResolve: false,
+			autoCommitInterval: 5000,
+			autoCommitThreshold: 100,
 			eachBatch:
 				this.getBatchHandler() ||
-				(async ({ batch, resolveOffset, heartbeat, isRunning, isStale }): Promise<void> => {
+				(async ({ batch, resolveOffset, commitOffsetsIfNecessary, heartbeat, isRunning, isStale }): Promise<void> => {
 					debug(`Consuming batch of ${batch.messages.length} messages`);
 					for (const message of batch.messages) {
 						if (!isRunning() || isStale()) break;
@@ -63,6 +65,10 @@ export class DefaultConsumerService extends ConsumerService {
 						await this.getMessageHandler().call(this as DefaultConsumerService, message);
 
 						resolveOffset(message.offset);
+
+						// Commit any resolved offsets using autoCommit thresholds
+						await commitOffsetsIfNecessary();
+
 						await heartbeat();
 					}
 				}),
