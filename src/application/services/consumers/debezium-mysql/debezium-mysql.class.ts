@@ -68,7 +68,7 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 			eachBatch: async ({ batch, resolveOffset, commitOffsetsIfNecessary, heartbeat, isRunning, isStale }): Promise<void> => {
 				Debug('metamorphosis:app:consumer:debezium-mysql:debug')(`Consuming batch of ${batch.messages.length} messages`);
 
-				Debug('metamorphosis:app:consumer:debezium-mysql:debug')('Consuming batch: %O', {
+				Debug('metamorphosis:app:consumer:debezium-mysql:debug')('Consuming batch: %o', {
 					topic: batch.topic,
 					partition: batch.partition,
 					highWatermark: batch.highWatermark,
@@ -79,7 +79,7 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 					if (!isRunning() || isStale()) break;
 
 					try {
-						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Message: %O', message);
+						Debug('metamorphosis:app:consumer:debezium-mysql:verbose')('Message: %o', message);
 
 						// Extract message value from Kafka message
 						const { value: messageValue } = message || {};
@@ -97,6 +97,7 @@ export class DebeziumMysqlConsumerService extends ConsumerService {
 						try {
 							parsedValue = this.registry ? await this.registry.decode(messageValue) : JSON.parse(messageValue.toString());
 						} catch (err) {
+							Debug('metamorphosis:app:consumer:debezium-mysql:debug')('Failed parsing message: %o', err);
 							resolveOffset(message.offset);
 							continue;
 						}
