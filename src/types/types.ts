@@ -1,6 +1,17 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import fastify, { HTTPMethod, RequestHandler } from 'fastify';
-import { KafkaConfig, ConsumerConfig, EachBatchPayload, ProducerConfig, Message, Kafka, RecordMetadata } from 'kafkajs';
+import {
+	KafkaConfig,
+	Consumer,
+	ConsumerConfig,
+	EachBatchPayload,
+	Producer,
+	ProducerConfig,
+	Message,
+	Kafka,
+	RecordMetadata,
+	TopicMessages,
+} from 'kafkajs';
 import { PoolConnection, ConnectionOptions, RowDataPacket, OkPacket, FieldPacket, QueryOptions } from 'mysql2';
 import { EventEmitter } from 'events';
 import { ApplicationServer } from '../server/server';
@@ -181,6 +192,10 @@ export declare class ProducerService<T = any> extends Service<T> implements Serv
 	constructor(options: ProducerServiceOptions);
 	send(message: Message): Promise<RecordMetadata[]>;
 	sendMessages(messages: Message[]): Promise<RecordMetadata[]>;
+	sendBatch(topicMessages: TopicMessages[]): Promise<RecordMetadata[]>;
+	start(): Promise<any>;
+	getTopic(): string;
+	getProducer(): Producer;
 }
 
 export type DefaultProducerServiceOptions = ProducerServiceOptions;
@@ -197,7 +212,6 @@ export declare class DefaultProducerService<T = any> extends ProducerService<T> 
 	options: DefaultProducerServiceOptions;
 
 	constructor(options?: DefaultProducerServiceOptions);
-	start(): Promise<void>;
 }
 
 /********************************
@@ -212,6 +226,14 @@ export interface ConsumerServiceOptions extends ServiceOptions {
 export declare class ConsumerService<T = any> extends Service<T> implements ServiceMethods<T> {
 	options: ConsumerServiceOptions;
 	constructor(options: ConsumerServiceOptions);
+	start(): Promise<any>;
+	stop(): Promise<void>;
+	restart(): Promise<any>;
+	getConsumer(): Consumer;
+	getGroupId(): string;
+	getTopic(): string;
+	getMessageHandler(): ConsumerMessageCallback;
+	getBatchHandler(): ConsumerBatchCallback | undefined;
 }
 
 export type DefaultConsumerServiceOptions = ConsumerServiceOptions;
@@ -250,6 +272,20 @@ export declare class MysqlConsumerService<T = any> extends ConsumerService<T> im
 	options: MysqlConsumerServiceOptions;
 
 	constructor(options?: MysqlConsumerServiceOptions);
+	start(): Promise<void>;
+}
+
+/********************************
+ ***  Replicator Services
+ *******************************/
+export interface ReplicatorServiceOptions extends ConsumerServiceOptions {
+	replicaKafkaSettings: ApplicationKafkaSettings;
+	batchHandler?: ConsumerBatchCallback;
+}
+
+export declare class ReplicatorService<T = any> extends Service<T> implements ServiceMethods<T> {
+	options: ReplicatorServiceOptions;
+	constructor(options: ReplicatorServiceOptions);
 	start(): Promise<void>;
 }
 

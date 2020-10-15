@@ -26,7 +26,7 @@ export class ProducerService extends Service {
 
 		// Get producer config
 		const {
-			kafkaSettings: { producer: producerConfig },
+			kafkaSettings: { producer: producerConfig = {} },
 		} = options || { producer: {} };
 
 		debug(`Creating producer (${options.id}) `, producerConfig);
