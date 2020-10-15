@@ -17,9 +17,7 @@ export default function(app: Application): void {
 	const kafkaSettings = app.get('config.kafka');
 
 	// Get default consumer topic
-	const {
-		producer: { topic: defaultTopic, compression },
-	} = kafkaSettings || { producer: { topic: {} } };
+	const { producer: { topic: defaultTopic = null, compression = null } = {} } = kafkaSettings || { producer: {} };
 
 	const options: DefaultProducerServiceOptions = {
 		id: 'producer',

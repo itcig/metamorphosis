@@ -5,6 +5,7 @@ import { Application } from '../types/types';
 export { default as services } from './services';
 export { default as consumers, consumer, sinkMysqlConsumer, debeziumMysqlConsumer } from './services/consumers';
 export { default as producers, producer } from './services/producers';
+export { replicator } from './services/replicator';
 
 // interface Metamophosis {
 // 	// <T = any>(): Application<T>;
