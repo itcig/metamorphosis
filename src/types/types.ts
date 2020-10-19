@@ -438,8 +438,4 @@ export interface Connection extends EventEmitter {
 	format(sql: string, values?: any | any[] | { [param: string]: any }): string;
 }
 
-export interface PoolConnection extends Connection {
-	release(): void;
-}
-
 export type SqlInsertValues = { [key: string]: any }[];
