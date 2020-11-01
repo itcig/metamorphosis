@@ -6,6 +6,7 @@ import config from 'config';
 import * as DotEnv from 'dotenv';
 import parseEnvValue from '../utils/parse-env-value';
 import { GenericOptions, InitFunction } from '../types/types';
+import { isEmpty } from 'lodash';
 
 // Load config from dotenv
 const envConfig = DotEnv.config();
@@ -37,18 +38,31 @@ export default function init(opts?: GenericOptions): InitFunction {
 
 				if (typeof value === 'object' && value !== null) {
 					value = convert(value);
+
+					// Remove empty objects
+					if (isEmpty(value)) {
+						return;
+					}
 				}
 
 				if (typeof value === 'string') {
+					// Allow escaping strings that match ENV values
 					if (value.indexOf('\\') === 0) {
 						value = value.replace('\\', '');
 					} else {
+						// Check if value is in ENV
 						if (process.env[value]) {
 							value = process.env[value];
 						}
+
+						// Make relative paths absolute
 						if (value.indexOf('.') === 0 || value.indexOf('..') === 0) {
-							// Make relative paths absolute
 							value = path.resolve(path.join(config.util.getEnv('NODE_CONFIG_DIR')), value.replace(/\//g, path.sep));
+						}
+
+						// Remove all UPPERCASE_KEYS remaining as these are presumed not passed
+						if (value.trim().match(/^[A-Z_]+$/)) {
+							return;
 						}
 					}
 				}
