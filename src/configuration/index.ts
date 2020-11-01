@@ -40,15 +40,23 @@ export default function init(opts?: GenericOptions): InitFunction {
 				}
 
 				if (typeof value === 'string') {
+					// Allow escaping strings that match ENV values
 					if (value.indexOf('\\') === 0) {
 						value = value.replace('\\', '');
 					} else {
+						// Check if value is in ENV
 						if (process.env[value]) {
 							value = process.env[value];
 						}
+
+						// Make relative paths absolute
 						if (value.indexOf('.') === 0 || value.indexOf('..') === 0) {
-							// Make relative paths absolute
 							value = path.resolve(path.join(config.util.getEnv('NODE_CONFIG_DIR')), value.replace(/\//g, path.sep));
+						}
+
+						// Remove all UPPERCASE_KEYS remaining as these are presumed not passed
+						if (value.trim().match(/^[A-Z_]+$/)) {
+							return;
 						}
 					}
 				}
