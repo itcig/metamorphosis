@@ -6,6 +6,7 @@ import config from 'config';
 import * as DotEnv from 'dotenv';
 import parseEnvValue from '../utils/parse-env-value';
 import { GenericOptions, InitFunction } from '../types/types';
+import { isEmpty } from 'lodash';
 
 // Load config from dotenv
 const envConfig = DotEnv.config();
@@ -37,6 +38,11 @@ export default function init(opts?: GenericOptions): InitFunction {
 
 				if (typeof value === 'object' && value !== null) {
 					value = convert(value);
+
+					// Remove empty objects
+					if (isEmpty(value)) {
+						return;
+					}
 				}
 
 				if (typeof value === 'string') {
