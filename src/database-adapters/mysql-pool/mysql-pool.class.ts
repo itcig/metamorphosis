@@ -30,7 +30,7 @@ export class DatabaseMysqlPoolClient extends DatabaseBaseClient implements Datab
 			const timeZone = this.getTimezone();
 			const tzOffset = timeZone
 				? moment()
-						.tz(this.getTimezone())
+						.tz(timeZone)
 						.format('Z')
 				: moment().format('Z');
 
