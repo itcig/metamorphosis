@@ -4,6 +4,7 @@ import { Application } from '../types/types';
 // Export barrel objects as well as individual service so we can import all or specific services in our application
 export { default as services } from './services';
 export { default as consumers, consumer, sinkMysqlConsumer, debeziumMysqlConsumer } from './services/consumers';
+export { ksqldb } from './services/ksqldb';
 export { default as producers, producer } from './services/producers';
 export { replicator } from './services/replicator';
 
