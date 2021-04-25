@@ -88,7 +88,10 @@ export interface ConsumerTypes {}
 // A mapping of producer names to types. Will be extended in service files.
 export interface ProducerTypes {}
 
-export type ServiceTypes = ConsumerTypes & ProducerTypes;
+// A mapping of other service names to types. Will be extended in service files.
+export interface OtherTypes {}
+
+export type ServiceTypes = ConsumerTypes & ProducerTypes & OtherTypes;
 
 // type Service<T> = ServiceOverloads<T> & ServiceAddons<T> & ServiceMethods<T>;
 
@@ -272,6 +275,19 @@ export declare class MysqlConsumerService<T = any> extends ConsumerService<T> im
 	options: MysqlConsumerServiceOptions;
 
 	constructor(options?: MysqlConsumerServiceOptions);
+	start(): Promise<void>;
+}
+
+/********************************
+ ***  KsqlDb Services
+ *******************************/
+export interface KsqlDbServiceOptions extends ServiceOptions {
+	host: string;
+}
+
+export declare class KsqlDbService<T = any> extends Service<T> implements ServiceMethods<T> {
+	options: KsqlDbServiceOptions;
+	constructor(options: KsqlDbServiceOptions);
 	start(): Promise<void>;
 }
 
