@@ -9,6 +9,4 @@ export * from './server';
 
 export * from './types/types';
 
-export { logLevel } from 'kafkajs';
-
 export default Application;
