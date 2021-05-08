@@ -263,7 +263,7 @@ export class KsqlDbService extends Service {
 			executeResponse = await this.drop(datasource, deleteTopic);
 
 			// Describe
-		} else if (ksql.match(/^describe (extended)?/gim)) {
+		} else if (ksql.match(/^describe[\s\w_]+?(extended)?/gim)) {
 			const datasource = this.getDatasource(ksql);
 
 			if (!datasource) {
@@ -456,7 +456,7 @@ export class KsqlDbService extends Service {
 	 * @returns
 	 */
 	async describe(datasource: string, detail = false): Promise<GenericObject> {
-		const description = await this.apiCall('ksql', `DESCRIBE ${detail ? ' EXTENDED' : ''} ${datasource};`);
+		const description = await this.apiCall('ksql', `DESCRIBE ${datasource} ${detail ? ' EXTENDED' : ''};`);
 
 		const { sourceDescription } = (description && description[0]) || {};
 
