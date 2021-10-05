@@ -51,7 +51,7 @@ export class Service<T = any> implements ServiceMethods<T> {
 			app.set('client', this.client);
 
 			// Load schema registry if URI is set
-			if (registry) {
+			if (registry && registry.host) {
 				this.registry = new KafkaSchemaRegistry(registry);
 
 				// Set registry for later use
