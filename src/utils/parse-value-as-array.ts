@@ -5,7 +5,7 @@
  */
 const parseValueAsArray = (value: string | any[]): any => {
 	// Return if undefined
-	if (!value === undefined) {
+	if (value === undefined) {
 		return;
 	}
 

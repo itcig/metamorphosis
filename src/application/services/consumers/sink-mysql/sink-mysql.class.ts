@@ -82,8 +82,25 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					// Extract message value from Kafka message
 					const { value: messageValueBuffer } = message || {};
 
-					// Kafka message value is a Buffer containing a JSON string so decode
-					const messageValue = messageValueBuffer && JSON.parse(messageValueBuffer.toString());
+					// Skip if no message `value`
+					if (!messageValueBuffer) {
+						resolveOffset(message.offset);
+						continue;
+					}
+
+					let messageValue: GenericObject;
+
+					// Kafka message value should be Avro encoded so decode, otherwise try to read as JSON-encoded Buffer
+					// If unable to decode then skip as something is bunk with the message and it will never get past this offset
+					try {
+						messageValue = this.registry
+							? await this.registry.decode(messageValueBuffer)
+							: JSON.parse(messageValueBuffer.toString());
+					} catch (err) {
+						Debug('metamorphosis:app:consumer:sink-mysql:debug')('Failed parsing message: %o', err);
+						resolveOffset(message.offset);
+						continue;
+					}
 
 					let { values } = messageValue || {};
 					const { table, pk, fields } = messageValue || {};
