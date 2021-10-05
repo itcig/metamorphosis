@@ -116,7 +116,7 @@
     "prettier": "^1.19.1",
     "prettier-markdown": "^0.1.8",
     "progress": "^2.0.3",
-    "release-it": "^12.6.1",
+    "release-it": "^14.11.6",
     "rimraf": "^3.0.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"

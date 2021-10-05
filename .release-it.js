@@ -14,4 +14,7 @@ module.exports = {
 		release: true,
 		releaseName: '${version}',
 	},
+	npm: {
+		skipChecks: true,
+	},
 };
