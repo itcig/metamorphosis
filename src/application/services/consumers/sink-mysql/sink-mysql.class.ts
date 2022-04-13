@@ -76,6 +76,16 @@ export class SinkMysqlConsumerService extends ConsumerService {
 
 				const { topic: batchTopic, messages } = batch;
 
+				// Parse consumer options
+				const { table: configTable } = this.sinkMysqlConsumerOptions || {};
+				const {
+					name: configTableName,
+					topicRegex: configTableTopicRegex,
+					topicRegexReplacement: configTableTopicRegexReplacement,
+					topicPrefix: configTableTopicPrefix,
+					topicSuffix: configTableTopicSuffix,
+				} = configTable || {};
+
 				for (const message of messages) {
 					if (!isRunning() || isStale()) break;
 
@@ -117,12 +127,30 @@ export class SinkMysqlConsumerService extends ConsumerService {
 					}
 
 					// Get table name from message or config
-					const { table: configTable } = this.sinkMysqlConsumerOptions || {};
-					const { name: configTableName, topicPrefix: configTableTopicPrefix } = configTable || {};
+					let tableNameDerivedFromPattern = batchTopic;
+
+					if (configTableTopicRegex) {
+						const topicMatches = configTableTopicRegex.exec(batchTopic);
+
+						if (topicMatches.length) {
+							tableNameDerivedFromPattern = configTableTopicRegexReplacement
+								? configTableTopicRegexReplacement.replace('$1', topicMatches[1])
+								: topicMatches[1];
+						}
+					} else if (configTableTopicPrefix || configTableTopicSuffix) {
+						tableNameDerivedFromPattern = configTableTopicPrefix && batchTopic.replace(configTableTopicPrefix, '');
+						tableNameDerivedFromPattern = configTableTopicSuffix && batchTopic.replace(configTableTopicSuffix, '');
+					}
+
+					// if (tableNameDerivedFromPattern !== batchTopic) {
+					// 	Debug('metamorphosis:app:consumer:sink-mysql:debug')(
+					// 		'Derived table name from topic: %s',
+					// 		tableNameDerivedFromPattern
+					// 	);
+					// }
 
 					// Order of precedence is table specified in message, explicitly in app config, or as a pattern suffix to all consumed topics
-					const dbTable =
-						table || configTableName || (configTableTopicPrefix ? batchTopic.replace(configTableTopicPrefix, '') : null);
+					const dbTable = table || configTableName || tableNameDerivedFromPattern;
 
 					// Skip if no table can be derived
 					if (!dbTable) {
@@ -130,15 +158,20 @@ export class SinkMysqlConsumerService extends ConsumerService {
 						continue;
 					}
 
-					const {
-						fields: { whitelist, fromUnixtime },
-					} = this.sinkMysqlConsumerOptions;
+					const { fields: fieldRules = {}, masks } = this.sinkMysqlConsumerOptions || {};
+					const { whitelist, fromUnixtime, mask } = fieldRules;
+					const { email: emailMask, phone: phoneMask } = mask || {};
 
 					// Get fields that should be allowed (use all keys if empty)
 					const whitelistFields = parseValueAsArray(whitelist);
 
 					// Get fields that are passed as unix timestamps but should be converted to MySql date format YYYY-MM-DD HH:mm:ss
 					const convertEpochFields = parseValueAsArray(fromUnixtime);
+
+					const { emailHostname: maskEmailHostname } = masks || {};
+
+					const emailMaskFields = parseValueAsArray(emailMask);
+					const phoneMaskFields = parseValueAsArray(phoneMask);
 
 					// Get field schema if not yet set for batch
 					if (!batchFields.length) {
@@ -155,25 +188,48 @@ export class SinkMysqlConsumerService extends ConsumerService {
 
 							// Convert unix timestamps into MySql dates for specified fields.
 							// This will convert to the local timezone which will be set on the MySQL insert
-							if (!!convertEpochFields && convertEpochFields.includes(key)) {
-								let oDate = moment.unix(fieldValue);
+							if (
+								!!convertEpochFields &&
+								(convertEpochFields.includes(key) || convertEpochFields.includes(`${dbTable}.${key}`))
+							) {
+								// Any falsey values should be converted to null
+								if (!fieldValue) {
+									fieldValue = null;
+								} else {
+									let oDate = moment.unix(fieldValue / 1000);
+									// Set timezone for client if passed to allow for proper TIMESTAMP data
+									const timeZone = this.database.getTimezone();
 
-								// Set timezone for client if passed to allow for proper TIMESTAMP data
-								const timeZone = this.database.getTimezone();
+									// Set timezone if configured
+									if (timeZone) {
+										oDate = oDate.tz(timeZone);
+									}
 
-								// Set timezone if configured
-								if (timeZone) {
-									oDate = oDate.tz(timeZone);
+									// Convert value to MySql datetime string
+									fieldValue = oDate.isValid() ? oDate.format('YYYY-MM-DD HH:mm:ss') : null;
 								}
+							}
 
-								// Convert value to MySql datetime string
-								fieldValue = oDate.format('YYYY-MM-DD HH:mm:ss');
+							// Mask email using VERP
+							if (!!emailMaskFields && (emailMaskFields.includes(key) || emailMaskFields.includes(`${dbTable}.${key}`))) {
+								fieldValue = !!fieldValue && fieldValue.replace('@', '=') + (maskEmailHostname || '@noreply.test');
+							}
+
+							// Mask phone by replacing with fake number
+							// TODO: allow for proper i18n of number
+							if (!!phoneMaskFields && (phoneMaskFields.includes(key) || phoneMaskFields.includes(`${dbTable}.${key}`))) {
+								fieldValue = !!fieldValue && '19992223344';
 							}
 
 							// Add value to final object
 							obj[key] = fieldValue;
 							return obj;
 						}, {});
+
+					// Debug('metamorphosis:app:consumer:sink-mysql:verbose')('Insert row: %o', {
+					// 	table: dbTable,
+					// 	values: [rowData],
+					// });
 
 					// See if batch insert already has rows for current table and either add or append
 					const tableIndex = batchInsertValues.findIndex(f => f.table === dbTable);
@@ -200,8 +256,8 @@ export class SinkMysqlConsumerService extends ConsumerService {
 						...(insert && { insert }),
 					});
 
-					debugVerbose('Result: ', result);
-
+					// debugVerbose('Result: ', result);
+					Debug('metamorphosis:app:consumer:sink-mysql:verbose')('Insert Result: ', result);
 					// TODO: On error re-insert failed messages to end of topic and allow the rest of the batch to finish??
 				}
 			},
